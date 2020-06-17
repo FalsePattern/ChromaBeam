@@ -1,0 +1,124 @@
+apply plugin: "eclipse"
+apply plugin: "java"
+apply plugin: "java-library"
+
+def version = '0.5.1'
+def gdxVersion = '1.9.10'
+ext {
+    appName = "chromabeam"
+    roboVMVersion = '2.3.8'
+    box2DLightsVersion = '1.4'
+    ashleyVersion = '1.7.0'
+    aiVersion = '1.8.0'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    google()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+}
+
+
+
+dependencies {
+    compile 'com.badlogicgames.gdx:gdx:' + gdxVersion
+    compile 'com.badlogicgames.gdx:gdx-backend-lwjgl3:' + gdxVersion
+    compile 'com.badlogicgames.gdx:gdx-platform:' + gdxVersion + ':natives-desktop'
+
+    compile group: 'net.nicoulaj.compile-command-annotations', name: 'compile-command-annotations', version: '1.2.3'
+    compile group: 'com.esotericsoftware', name: 'kryo', version: '5.0.0-RC6'
+}
+
+sourceCompatibility = 14
+sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.main.resources.srcDirs = ["assets"]
+
+project.ext.mainClassName = "com.github.falsepattern.chromabeam.desktop.DesktopLauncher"
+project.ext.assetsDir = new File("assets")
+
+
+task run(dependsOn: classes, type: JavaExec) {
+    main = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = project.assetsDir
+    ignoreExitValue = true
+}
+
+task debug(dependsOn: classes, type: JavaExec) {
+    main = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = project.assetsDir
+    ignoreExitValue = true
+    debug = true
+}
+
+task dist(type: Jar) {
+    archiveName("chromabeam-" + version + ".jar")
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+        attributes 'Premain-Class': project.mainClassName
+    }
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+dist.dependsOn classes
+task sourcesJar(type: Jar, dependsOn: classes) {
+    exclude("*.png")
+    exclude("*.dll")
+    exclude("*.git")
+    exclude("*.sha1")
+    exclude("*.so")
+    exclude("*.dylib")
+    exclude("*.ser")
+    exclude("*.txt")
+    exclude("*.xml")
+    exclude("**coreassets**")
+    archiveName("chromabeam-" + version + "-mdk-sources.jar")
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    exclude("*.png")
+    exclude("*.dll")
+    exclude("*.git")
+    exclude("*.sha1")
+    exclude("*.so")
+    exclude("*.dylib")
+    exclude("*.ser")
+    exclude("*.txt")
+    exclude("*.xml")
+    exclude("**coreassets**")
+    archiveName("chromabeam-" + version + "-mdk-javadoc.jar")
+    from javadoc.destinationDir
+}
+task mdk(type: Jar) {
+    exclude("*.png")
+    exclude("*.dll")
+    exclude("*.git")
+    exclude("*.sha1")
+    exclude("*.so")
+    exclude("*.dylib")
+    exclude("*.ser")
+    exclude("*.txt")
+    exclude("*.xml")
+    exclude("**coreassets**")
+    project.ext.assetsDir = ""
+    archiveName("chromabeam-" + version + "-mdk.jar")
+    delete(file("build/libs/chromabeam-" + version + "-mdk.jar"))
+    from {
+        configurations.compileClasspath.collect{it.isDirectory() ? it : zipTree(it)}
+    }
+    with jar
+}
+mdk.dependsOn sourcesJar, javadocJar
+
+
+eclipse.project.name = appName + "-desktop"
