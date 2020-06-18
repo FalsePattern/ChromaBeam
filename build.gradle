@@ -28,7 +28,6 @@ dependencies {
     compile 'com.badlogicgames.gdx:gdx-backend-lwjgl3:' + gdxVersion
     compile 'com.badlogicgames.gdx:gdx-platform:' + gdxVersion + ':natives-desktop'
 
-    compile group: 'net.nicoulaj.compile-command-annotations', name: 'compile-command-annotations', version: '1.2.3'
     compile group: 'com.esotericsoftware', name: 'kryo', version: '5.0.0-RC6'
 }
 
@@ -38,24 +37,6 @@ sourceSets.main.resources.srcDirs = ["assets"]
 
 project.ext.mainClassName = "com.github.falsepattern.chromabeam.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("assets")
-
-
-task run(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
-    classpath = sourceSets.main.runtimeClasspath
-    standardInput = System.in
-    workingDir = project.assetsDir
-    ignoreExitValue = true
-}
-
-task debug(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
-    classpath = sourceSets.main.runtimeClasspath
-    standardInput = System.in
-    workingDir = project.assetsDir
-    ignoreExitValue = true
-    debug = true
-}
 
 task dist(type: Jar) {
     archiveName("chromabeam-" + version + ".jar")
