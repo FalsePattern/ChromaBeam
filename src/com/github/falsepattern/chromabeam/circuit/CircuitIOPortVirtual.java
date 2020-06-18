@@ -12,7 +12,7 @@ public class CircuitIOPortVirtual extends BasicComponent {
     int linkID = 0;
     CircuitMaster master;
     public CircuitIOPortVirtual() {
-        super(1, "circuit.input");
+        super(1, "circuit.input", "circuit");
     }
 
     @Override

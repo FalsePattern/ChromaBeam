@@ -149,7 +149,9 @@ public abstract class Component implements KryoSerializable {
 
     private boolean isPrefab;
 
-    private String registryName;
+    protected String registryName;
+
+    protected String category;
 
     /**
      * Create a new component with the specified parameters. The component must not do initialization in it's constructor!
@@ -158,9 +160,10 @@ public abstract class Component implements KryoSerializable {
      * @param registryName The name this component should be registered as. Must be the same as the component's
      *                     texture's registration name.
      */
-    public Component(int alternativeCount, String registryName) {
+    public Component(int alternativeCount, String registryName, String category) {
         this.alternativeCount = alternativeCount;
         this.registryName = registryName;
+        this.category = category;
         setTexture();
         this.isPrefab = true;
     }
@@ -380,6 +383,10 @@ public abstract class Component implements KryoSerializable {
      * Called when the player stops left-clicking on the component. Not called when placing.
      */
     public abstract void clickStop();
+
+    public String getCategory() {
+        return category;
+    }
 
     /**
      * @return the color that this component should get drawn with. See {@link Color} for more information on the color

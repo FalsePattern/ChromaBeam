@@ -7,7 +7,7 @@ import com.github.falsepattern.chromabeam.mod.BeamCollision;
 import com.github.falsepattern.chromabeam.mod.Component;
 import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
 
-public class CircuitIOPort extends NoInteract {
+public class CircuitIOPort extends CircuitSlave {
     int linkID = 0;
     public CircuitIOPort() {
         super(1, "circuit.input");

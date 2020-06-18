@@ -19,6 +19,7 @@ import java.util.zip.ZipFile;
 public class DesktopLauncher {
 	private static List<File> modFiles;
 	private static FileOutputStream logStream;
+	private static boolean instrumented = false;
 	public static void premain(String args, Instrumentation instrumentation) throws FileNotFoundException {
 		logStream = new FileOutputStream("log.txt");
 		var sysOutStream = System.out;
@@ -44,8 +45,12 @@ public class DesktopLauncher {
 				}
 			}
 		}
+		instrumented = true;
 	}
 	public static void main (String[] arg) throws IOException {
+		if (!instrumented) {
+			System.out.println("Either the game was not launched using -javaagent, or an error occurred while discovering mod files!");
+		}
 		try {
 			//Suppressing java illegal reflective access warning because we are doing bad stuff in the game
 			try {
@@ -62,26 +67,23 @@ public class DesktopLauncher {
 			}
 			var config = new Lwjgl3ApplicationConfiguration();
 			List<Mod> mods = new LinkedList<>();
+			mods.add(0, new CoreMod());
 			if (modFiles.size() != 0) {
 				for (var mod : modFiles) {
-					Class<? extends Mod> modClass;
-					modClass = findMainClass(mod);
-					try {
-						if (modClass == null) {
-							System.err.println("[INIT] [SEVERE] Error while loading mod from file " + mod.getName() + ": No main mod class found!");
-						} else {
+					var modClasses = findMainClass(mod);
+					for (var modClass: modClasses) {
+						try {
 							var modInstance = (Mod) modClass.getConstructor().newInstance();
 							mods.add(modInstance);
 							System.out.println("[INIT] Registered main mod class " + modClass.getName() + " in file " + mod.getName());
+						} catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+							throw new RuntimeException("Error while instantiating " + modClass.getName() + " in mod " + mod.getName(), e);
+						} catch (ClassCastException e) {
+							throw new RuntimeException("Error while instantiating " + modClass.getName() + " in mod" + mod.getName() + ": Does not implement Mod interface");
 						}
-					} catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-						throw new RuntimeException("Error while instantiating " + modClass.getName() + " in mod " + mod.getName(), e);
-					} catch (ClassCastException e) {
-						throw new RuntimeException("Error while instantiating " + (modClass != null ? modClass.getName() + " in mod" : "") + mod.getName() + ": Does not implement Mod interface");
 					}
 				}
 			}
-			mods.add(0, new CoreMod());
 			mods.add(new CircuitMod());
 			config.setTitle("ChromaBeam");
 			config.setWindowIcon("icon.png");
@@ -92,20 +94,21 @@ public class DesktopLauncher {
 		System.exit(0);
 	}
 
-	private static Class<? extends Mod> findMainClass(File modFile) {
-		Class<? extends Mod> mainModClass = null;
+	private static List<Class<? extends Mod>> findMainClass(File modFile) {
+		List<Class<? extends Mod>> mainModClasses = new LinkedList<>();
 		try (var zipFile = new ZipFile(modFile)) {
 			for (var e = zipFile.entries(); e.hasMoreElements();) {
 				var zipEntry = e.nextElement();
 				if (!zipEntry.isDirectory()) {
 					var name = zipEntry.getName().replaceAll("/", ".");
-					if ((mainModClass = getMainModFile(name)) != null) break;
+					Class<? extends Mod> clazz = getMainModFile(name);
+					if (clazz != null) mainModClasses.add(clazz);
 				}
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return mainModClass;
+		return mainModClasses;
 	}
 
 	private static Class<? extends Mod> getMainModFile(String name) {

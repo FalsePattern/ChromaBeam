@@ -12,12 +12,19 @@ public final class ComponentRegistry {
     private final Map<Mod, List<Component>> modMapping;
     private final Map<Mod, Map<String, Component>> modAndNameMapping;
     private final Map<String, Component> nameMapping;
+    private final Map<String, Map<String, Component>> categoryAndNameMapping;
+    private final Map<String, List<Component>> categoryMapping;
+    private final List<String> categories;
     private boolean ended = false;
     ComponentRegistry() {
         prefabs = new UnsafeList<>();
         modMapping = new HashMap<>();
         modAndNameMapping = new HashMap<>();
         nameMapping = new HashMap<>();
+        categoryAndNameMapping = new HashMap<>();
+        categories = new UnsafeList<>();
+        categories.add("interact");
+        categoryMapping = new HashMap<>();
     }
 
     private Mod regMod;
@@ -28,19 +35,27 @@ public final class ComponentRegistry {
 
     public void registerComponent(Class<? extends Component> componentClass) {
         if (ended) throw new IllegalStateException("Cannot register component after the registration phase has ended!");
-        var list = modMapping.computeIfAbsent(regMod, (ignored) -> new UnsafeList<>());
-        var nameMap = modAndNameMapping.computeIfAbsent(regMod, (ignored) -> new HashMap<>());
+        var modMap = modMapping.computeIfAbsent(regMod, (ignored) -> new UnsafeList<>());
+        var modNameMap = modAndNameMapping.computeIfAbsent(regMod, (ignored) -> new HashMap<>());
         Component component;
         try {
             component = componentClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException("Error while loading mod " + regMod.getModid(), e);
         }
+        var category = component.getCategory();
+        var categoryNameMap = categoryAndNameMapping.computeIfAbsent(category, (ignored) -> new HashMap<>());
+        var categoryMap = categoryMapping.computeIfAbsent(category, (ignored) -> new UnsafeList<>());
+        if (!categories.contains(category)) {
+            categories.add(category);
+        }
         prefabs.add(component);
-        list.add(component);
+        modMap.add(component);
+        categoryMap.add(component);
         var regName = component.getRegistryName();
-        nameMap.put(regName, component);
+        modNameMap.put(regName, component);
         nameMapping.put(regName, component);
+        categoryNameMap.put(regName, component);
     }
 
     public void registerComponents(Class<? extends Component>... componentClasses) {
@@ -51,6 +66,16 @@ public final class ComponentRegistry {
 
     void finish() {
         ended = true;
+        prefabs.sort((left, right) -> {
+            var leftCategory = left.getCategory();
+            var rightCategory = right.getCategory();
+            if (leftCategory.equals(rightCategory)) {
+                var catComps = categoryMapping.get(leftCategory);
+                return catComps.indexOf(left) - catComps.indexOf(right);
+            } else {
+                return categories.indexOf(leftCategory) - categories.indexOf(rightCategory);
+            }
+        });
     }
 
     public Component getPrefab(Mod mod, String name) {
@@ -61,6 +86,8 @@ public final class ComponentRegistry {
         return modMapping.getOrDefault(mod, Collections.emptyList());
     }
 
+    public List<Component> getPrefabs(String category) { return categoryMapping.getOrDefault(category, Collections.emptyList()); }
+
     public Component getPrefab(String name) {
         return nameMapping.get(name);
     }
@@ -68,4 +95,6 @@ public final class ComponentRegistry {
     public List<Component> getAllPrefabs() {
         return prefabs;
     }
+
+    public List<String> getAllCategories() {return categories;}
 }

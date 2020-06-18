@@ -25,11 +25,10 @@ public class CoreMod implements Mod {
         for (var tex: coreTextures) {
             regTex(tex, registry);
         }
-        registry.langRegistry.register("core", "Interact");
-        registry.langRegistry.register("base", "Base");
-        registry.langRegistry.register("circuitinput", "Circuit Input");
-        registry.langRegistry.register("circuitoutput", "Circuit Output");
-        registry.langRegistry.register("circuitbody", "Integrated Circuit");
+        registry.langRegistry.register("category.interact", "Interact");
+        registry.langRegistry.register("category.circuit", "Circuit");
+        registry.langRegistry.register("circuit.input", "Circuit IO port");
+        registry.langRegistry.register("circuit.body", "Integrated Circuit");
     }
 
     private void regTex(String name, AssetRegistry registry) {
@@ -55,7 +54,7 @@ public class CoreMod implements Mod {
         stuffPlacer.setComponentRegistry(registry);
         gui.initArrowTexture(GlobalData.textureManager);
         Gdx.app.postRunnable(() -> {
-            gui.readNamesFromRegistry(GlobalData.mods, registry, GlobalData.langManager);
+            gui.readNamesFromRegistry(registry, GlobalData.langManager);
             gui.setSelectedComponent(0);
         });
     }
@@ -90,6 +89,6 @@ public class CoreMod implements Mod {
 
     @Override
     public String getVersion() {
-        return "0.5.1";
+        return "0.6.0";
     }
 }

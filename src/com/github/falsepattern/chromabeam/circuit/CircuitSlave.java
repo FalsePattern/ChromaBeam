@@ -2,7 +2,7 @@ package com.github.falsepattern.chromabeam.circuit;
 
 import com.github.falsepattern.chromabeam.mod.BasicComponent;
 
-public abstract class NoInteract extends BasicComponent {
+public abstract class CircuitSlave extends BasicComponent {
 
     public CircuitMaster master;
     /**
@@ -13,8 +13,8 @@ public abstract class NoInteract extends BasicComponent {
      * @param alternativeCount
      * @param registryName
      */
-    public NoInteract(int alternativeCount, String registryName) {
-        super(alternativeCount, registryName);
+    public CircuitSlave(int alternativeCount, String registryName) {
+        super(alternativeCount, registryName, "circuit");
     }
 
 

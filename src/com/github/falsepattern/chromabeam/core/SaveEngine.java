@@ -3,7 +3,7 @@ package com.github.falsepattern.chromabeam.core;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.github.falsepattern.chromabeam.circuit.NoInteract;
+import com.github.falsepattern.chromabeam.circuit.CircuitSlave;
 import com.github.falsepattern.chromabeam.util.ImmutablePair;
 import com.github.falsepattern.chromabeam.mod.Component;
 
@@ -146,11 +146,11 @@ public class SaveEngine {
     public static void serializeComponents(Kryo kryo, Output output, Component[] components) {
         int savedCount = 0;
         for (int i = 0; i < components.length; i++) {
-            if (!(components[i] instanceof NoInteract)) savedCount++;
+            if (!(components[i] instanceof CircuitSlave)) savedCount++;
         }
         output.writeInt(savedCount);
         for (int i = 0; i < components.length; i++) {
-            if (!(components[i] instanceof NoInteract)) kryo.writeClassAndObject(output, components[i]);
+            if (!(components[i] instanceof CircuitSlave)) kryo.writeClassAndObject(output, components[i]);
         }
     }
 

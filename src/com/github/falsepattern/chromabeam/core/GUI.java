@@ -20,14 +20,14 @@ import java.util.Map;
 
 class GUI implements Renderable, InputHandler {
     public enum GUIMode {
-        PLACER, SELECTOR, COPYPASTE, CUTPASTE, STACKPRIME, CIRCUIT, STACKEXECUTE
+        PLACER, SELECTOR, COPYPASTE, CUTPASTE, STACKPRIME, STACKEXECUTE
     }
 
 
     private final BitmapFont font;
-    private Map<Mod, String[]> componentModMappings = new HashMap<>();
-    private int[] modComponentCounts = new int[0];
-    private Mod[] mods = new Mod[0];
+    private final Map<String, String[]> componentCategoryMappings = new HashMap<>();
+    private int[] categoryComponentCounts = new int[0];
+    private String[] categories = new String[0];
     private int selected;
     private int selectedGroup;
     private TextureRegion arrowTexture;
@@ -193,16 +193,15 @@ class GUI implements Renderable, InputHandler {
             var h = font.getLineHeight();
             if(prevGroup != selectedGroup || menuText.equals("")) {
                 var newText = new StringBuilder();
-                for (int i = 0; i < mods.length; i++) {
-                    newText.append(GlobalData.langManager.translate(mods[i].getModid())).append('\n');
+                for (int i = 0; i < categories.length; i++) {
+                    newText.append(GlobalData.langManager.translate("category." + categories[i])).append('\n');
                     if (i == selectedGroup) {
-                        var componentNames = componentModMappings.get(mods[i]);
+                        String[] componentNames = componentCategoryMappings.get(categories[i]);
                         for (int l = 0; l < componentNames.length; l++) {
                             newText.append("  ").append(componentNames[l]).append('\n');
                         }
                     }
                 }
-                prevSelected = selected;
                 prevGroup = selectedGroup;
                 menuText = newText.toString();
             }
@@ -210,7 +209,7 @@ class GUI implements Renderable, InputHandler {
             batch.draw(arrowTexture, 10, (selected + selectedGroup) * h + 13, 16, 16);
         }
     }
-    private int prevSelected = -1;
+
     private int prevGroup = -1;
     private String menuText = "";
 
@@ -302,21 +301,22 @@ class GUI implements Renderable, InputHandler {
         font.dispose();
     }
 
-    public void readNamesFromRegistry(Mod[] mods, ComponentRegistry registry, LangManager langManager) {
-        modComponentCounts = new int[mods.length];
-        this.mods = mods;
-        for (int i = 0; i < mods.length; i++) {
-            var prefabs = registry.getPrefabs(mods[i]);
+    public void readNamesFromRegistry(ComponentRegistry registry, LangManager langManager) {
+        categories = registry.getAllCategories().toArray(String[]::new);
+        categoryComponentCounts = new int[categories.length];
+        for (int i = 0; i < categories.length; i++) {
+            var cat = categories[i];
+            var prefabs = registry.getPrefabs(cat);
             var componentNames = prefabs.stream().map((component -> langManager.translate(component.getRegistryName()))).toArray(String[]::new);
-            componentModMappings.put(mods[i], componentNames);
-            modComponentCounts[i] = componentNames.length;
+            componentCategoryMappings.put(cat, componentNames);
+            categoryComponentCounts[i] = componentNames.length;
         }
     }
 
     public void setSelectedComponent(int selectedComponent) {
         selectedGroup = 0;
-        while (selectedComponent > modComponentCounts[selectedGroup]) {
-            selectedComponent -= modComponentCounts[selectedGroup++];
+        while (selectedComponent > categoryComponentCounts[selectedGroup]) {
+            selectedComponent -= categoryComponentCounts[selectedGroup++];
         }
         selected = selectedComponent;
     }

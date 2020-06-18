@@ -2,7 +2,7 @@ apply plugin: "eclipse"
 apply plugin: "java"
 apply plugin: "java-library"
 
-def version = '0.5.1'
+def version = '0.6.0'
 def gdxVersion = '1.9.10'
 ext {
     appName = "chromabeam"
@@ -38,7 +38,10 @@ sourceSets.main.resources.srcDirs = ["assets"]
 project.ext.mainClassName = "com.github.falsepattern.chromabeam.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("assets")
 
-task dist(type: Jar) {
+
+
+
+task distJar(type: Jar) {
     archiveName("chromabeam-" + version + ".jar")
     manifest {
         attributes 'Main-Class': project.mainClassName
@@ -50,7 +53,15 @@ task dist(type: Jar) {
     }
     with jar
 }
-dist.dependsOn classes
+distJar.dependsOn classes
+
+task dist(type: Copy) {
+    mkdir "$projectDir/dist"
+    from file("$buildDir/libs/chromabeam-" + version + ".jar")
+    into file("$projectDir/dist")
+}
+dist.dependsOn distJar
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     exclude("*.png")
     exclude("*.dll")
@@ -97,6 +108,7 @@ task mdk(type: Jar) {
     from {
         configurations.compileClasspath.collect{it.isDirectory() ? it : zipTree(it)}
     }
+
     with jar
 }
 mdk.dependsOn sourcesJar, javadocJar

@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryo.Kryo;
 import com.github.falsepattern.chromabeam.circuit.CircuitMaster;
-import com.github.falsepattern.chromabeam.circuit.NoInteract;
+import com.github.falsepattern.chromabeam.circuit.CircuitSlave;
 import com.github.falsepattern.chromabeam.graphics.DrawingHelpers;
 import com.github.falsepattern.chromabeam.mod.interfaces.InputHandler;
 import com.github.falsepattern.chromabeam.mod.interfaces.Renderable;
@@ -93,9 +93,9 @@ class StuffPlacer implements Renderable, InputHandler {
         for (var comp:clonedComponents.a) {
             int x = comp.getX() + positionA.x;
             int y = comp.getY() + positionA.y;
-            if (comp instanceof NoInteract) {
-                x += ((NoInteract) comp).master.getX();
-                y += ((NoInteract) comp).master.getY();
+            if (comp instanceof CircuitSlave) {
+                x += ((CircuitSlave) comp).master.getX();
+                y += ((CircuitSlave) comp).master.getY();
             }
             for (int i = 1; i <= stackCount; i++) {
                 x += deltaX;
@@ -154,9 +154,9 @@ class StuffPlacer implements Renderable, InputHandler {
         for (var comp:clonedComponents.a) {
             int x = comp.getX() + this.x;
             int y = comp.getY() + this.y;
-            if (comp instanceof NoInteract) {
-                x += ((NoInteract) comp).master.getX();
-                y += ((NoInteract) comp).master.getY();
+            if (comp instanceof CircuitSlave) {
+                x += ((CircuitSlave) comp).master.getX();
+                y += ((CircuitSlave) comp).master.getY();
             }
             DrawingHelpers.drawComponentTextureColoredAlpha(batch, comp.getTexture(), x, y, comp.getRotation(), comp.getDrawColor(), comp.getFlipped(), 0.5f);
             warn |= world.getComponent(x, y) != null;
@@ -247,7 +247,7 @@ class StuffPlacer implements Renderable, InputHandler {
 
             for (var comp:clonedComponents.a) {
 
-                if (! (comp instanceof NoInteract)) {
+                if (! (comp instanceof CircuitSlave)) {
                     int x = comp.getX() + positionA.x;
                     int y = comp.getY() + positionA.y;
                     int rot = comp.getRotation();
@@ -296,7 +296,7 @@ class StuffPlacer implements Renderable, InputHandler {
         if (!overlapping && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             for (var comp : clonedComponents.a) {
 
-                if (! (comp instanceof NoInteract)) {
+                if (! (comp instanceof CircuitSlave)) {
                 comp.setPos(comp.getX() + x, comp.getY() + y);
                 world.setComponent(comp);
                 }
@@ -317,7 +317,7 @@ class StuffPlacer implements Renderable, InputHandler {
             int oX = positionA.x;
             int oY = positionA.y;
             for (var comp: clonedComponents.a) {
-                if (! (comp instanceof NoInteract))
+                if (! (comp instanceof CircuitSlave))
                 world.setComponent(comp.getX() + oX, comp.getY() + oY, comp);
             }
             for (var label: clonedComponents.b.entrySet()) {
@@ -367,7 +367,7 @@ class StuffPlacer implements Renderable, InputHandler {
         }
         if (GlobalData.keyBinds.isJustPressed("right")) {
             for (var comp:clonedComponents.a) {
-                if (!(comp instanceof NoInteract))
+                if (!(comp instanceof CircuitSlave))
                 comp.setX(comp.getX() + 1);
             }
             for (var label: clonedComponents.b.keySet()) {
@@ -376,7 +376,7 @@ class StuffPlacer implements Renderable, InputHandler {
         }
         if (GlobalData.keyBinds.isJustPressed("left")) {
             for (var comp:clonedComponents.a) {
-                if (!(comp instanceof NoInteract))
+                if (!(comp instanceof CircuitSlave))
                 comp.setX(comp.getX() - 1);
             }
             for (var label: clonedComponents.b.keySet()) {
@@ -385,7 +385,7 @@ class StuffPlacer implements Renderable, InputHandler {
         }
         if (GlobalData.keyBinds.isJustPressed("up")) {
             for (var comp:clonedComponents.a) {
-                if (!(comp instanceof NoInteract))
+                if (!(comp instanceof CircuitSlave))
                 comp.setY(comp.getY() + 1);
             }
             for (var label: clonedComponents.b.keySet()) {
@@ -394,7 +394,7 @@ class StuffPlacer implements Renderable, InputHandler {
         }
         if (GlobalData.keyBinds.isJustPressed("down")) {
             for (var comp:clonedComponents.a) {
-                if (!(comp instanceof NoInteract))
+                if (!(comp instanceof CircuitSlave))
                 comp.setY(comp.getY() - 1);
             }
             for (var label: clonedComponents.b.keySet()) {
@@ -407,7 +407,7 @@ class StuffPlacer implements Renderable, InputHandler {
         handleSelectionTransforms(shiftHeld);
         if ((!overlapping || shiftHeld) && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             for (var comp : clonedComponents.a) {
-                if (! (comp instanceof NoInteract))
+                if (! (comp instanceof CircuitSlave))
                 world.cloneComponent(comp.getX() + x, comp.getY() + y, comp.getRotation(), comp.getFlipped(), comp);
             }
             for (var label: clonedComponents.b.entrySet()) {
@@ -433,7 +433,7 @@ class StuffPlacer implements Renderable, InputHandler {
         for (int y = y1; y <= y2; y++) {
             for (int x = x1; x <= x2; x++) {
                 var comp = world.getComponent(x, y);
-                if (comp != null && !(comp instanceof NoInteract)) {
+                if (comp != null && !(comp instanceof CircuitSlave)) {
                     var clone = comp.createCloneWithTransform(comp.getX() - x1, comp.getY() - y2, comp.getRotation(), comp.getFlipped(), comp.getAlternativeID());
                     clonedComponents.a.add(clone);
                     if (clone instanceof CircuitMaster) {
@@ -601,7 +601,7 @@ class StuffPlacer implements Renderable, InputHandler {
                             world.clear();
                             world.pause();
                             for (var comp : comps.A) {
-                                if (! (comp instanceof NoInteract))
+                                if (! (comp instanceof CircuitSlave))
                                 world.setComponent(comp);
                             }
                             world.unpause();
@@ -694,7 +694,7 @@ class StuffPlacer implements Renderable, InputHandler {
             interacting = false;
             var old = current == null ? selectedComponent == 1 ? prefabs.get(prefabs.size() - 1) : prefabs.get(0) : current;
             current = prefabs.get(selectedComponent - 1);
-            current.setTransform(old.getX(), old.getY(), old.getRotation(), old.getFlipped());
+            current.setPos(old.getX(), old.getY());
         }
     }
 }

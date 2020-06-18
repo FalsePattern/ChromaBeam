@@ -18,8 +18,8 @@ public abstract class BasicComponent extends Component{
      * It should be in the format of "developername.modname.componentname" or "modname.componentname" for consistency.
      * AlternativeCount defines how many alternative types the prefab of this component has.
      */
-    public BasicComponent(int alternativeCount, String registryName) {
-        super(alternativeCount, registryName);
+    public BasicComponent(int alternativeCount, String registryName, String category) {
+        super(alternativeCount, registryName, category);
     }
 
     /**

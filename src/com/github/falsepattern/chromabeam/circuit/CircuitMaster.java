@@ -13,7 +13,6 @@ import com.github.falsepattern.chromabeam.util.Vector2i;
 import com.github.falsepattern.chromabeam.util.storage.UnsafeList;
 import com.github.falsepattern.chromabeam.world.BetterWorld;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -28,7 +27,7 @@ public class CircuitMaster extends BasicComponent {
     private boolean deleting = false;
     private boolean unBuilt = true;
     public CircuitMaster() {
-        super(1, "circuit.body");
+        super(1, "circuit.body", "circuit");
     }
 
     @Override
@@ -81,9 +80,14 @@ public class CircuitMaster extends BasicComponent {
         var oY = origMaster.getY();
         parentWorld = origMaster.parentWorld;
         for (var slave: origMaster.slaves) {
-            var slaveClone = slave.createCloneWithTransform(slave.getX() - oX, slave.getY() - oY, slave.getRotation(), slave.getFlipped(), slave.getAlternativeID());
-            if (slaveClone instanceof NoInteract) {
-                ((NoInteract) slaveClone).master = this;
+            Component slaveClone;
+            if (origMaster.unBuilt) {
+                slaveClone = slave.createClone();
+            } else {
+                slaveClone = slave.createCloneWithTransform(slave.getX() - oX, slave.getY() - oY, slave.getRotation(), slave.getFlipped(), slave.getAlternativeID());
+            }
+            if (slaveClone instanceof CircuitSlave) {
+                ((CircuitSlave) slaveClone).master = this;
             }
             if (slaveClone instanceof CircuitIOPort) {
                 parentPorts.put(((CircuitIOPort) slaveClone).linkID, (CircuitIOPort)slaveClone);
@@ -93,7 +97,7 @@ public class CircuitMaster extends BasicComponent {
         var origComps = origMaster.childWorld.getAllComponents();
         childWorld = new BetterWorld();
         for (var origComp: origComps) {
-            if (origComp instanceof NoInteract) continue;
+            if (origComp instanceof CircuitSlave) continue;
             var clone = origComp.createClone();
             if (clone instanceof CircuitIOPortVirtual) {
                 childPorts.put(((CircuitIOPortVirtual) clone).linkID, (CircuitIOPortVirtual) clone);
@@ -193,7 +197,7 @@ public class CircuitMaster extends BasicComponent {
         height = input.readInt();
         int slaveCount = input.readInt();
         for (int i = 0; i < slaveCount; i++) {
-            var slave = (NoInteract)kryo.readClassAndObject(input);
+            var slave = (CircuitSlave)kryo.readClassAndObject(input);
             slave.master = this;
             slaves.add(slave);
             if (slave instanceof CircuitIOPort) {
