@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.github.falsepattern.chromabeam.mod.Mod;
 import com.github.falsepattern.chromabeam.mod.interfaces.InputHandler;
 import com.github.falsepattern.chromabeam.mod.interfaces.Renderable;
 import com.github.falsepattern.chromabeam.mod.interfaces.World;
@@ -29,7 +28,7 @@ class GUI implements Renderable, InputHandler {
     private int[] categoryComponentCounts = new int[0];
     private String[] categories = new String[0];
     private int selected;
-    private int selectedGroup;
+    int selectedCategory;
     private TextureRegion arrowTexture;
     private GUIMode mode = GUIMode.PLACER;
     private World world;
@@ -84,6 +83,7 @@ class GUI implements Renderable, InputHandler {
         var comp = getBindName("scroll_components");
         var alt = getBindName("scroll_alternatives");
         var label = getBindName("label");
+        var cat = getBindName("scroll_categories");
         strings = new String[] {
                 "\n\nIncrease by 1: " + up + "\nIncrease by 10: Shift + " + up +
                         "\n\nDecrease by 1: " + down + "\nDecrease by 10: Shift + " + down +
@@ -105,8 +105,9 @@ class GUI implements Renderable, InputHandler {
                         "\n\nMove left: " + left + ", right: " + right + ", up: " + up + ", down:" + down +
                         "\n\nReturn to selection: " + cancel,
                 "Press " + getBindName("keybind_hints") + " to toggle keybinding hints",
-                "Place: Left click       Delete: Right click       Pick component: Shift + Middle click\n\n" +
-                        "Next Component: " + comp + "       Previous Component: Shift + " + comp +
+                "Place: Left click       Delete: Right click       Pick component: Shift + Middle click" +
+                        "\n\nNext Component: " + comp + "       Previous Component: Shift + " + comp +
+                        "\n\nNext Category: " + cat + "       Previous Category: Shift + " + cat +
                         "\n\nNext Alternative: " + alt + "       Previous Alternative: Shift + " + alt +
                         "\n\nRotate Clockwise: " + rot + "       Rotate Counter-Clockwise: Shift + " + rot +
                         "\n\nFlip: " + flip +
@@ -191,22 +192,27 @@ class GUI implements Renderable, InputHandler {
             font.draw(batch, strings[6], 16, 48);
         } else {
             var h = font.getLineHeight();
-            if(prevGroup != selectedGroup || menuText.equals("")) {
+            if(prevGroup != selectedCategory || menuText.trim().equals("")) {
                 var newText = new StringBuilder();
                 for (int i = 0; i < categories.length; i++) {
                     newText.append(GlobalData.langManager.translate("category." + categories[i])).append('\n');
-                    if (i == selectedGroup) {
-                        String[] componentNames = componentCategoryMappings.get(categories[i]);
-                        for (int l = 0; l < componentNames.length; l++) {
-                            newText.append("  ").append(componentNames[l]).append('\n');
-                        }
-                    }
                 }
-                prevGroup = selectedGroup;
+                if (categories.length > selectedCategory && selectedCategory != 0) {
+                    newText.append("-------------\n");
+                    String[] componentNames = componentCategoryMappings.get(categories[selectedCategory]);
+                    for (int l = 0; l < componentNames.length; l++) {
+                        newText.append("  ").append(componentNames[l]).append('\n');
+                    }
+                    newText.append("-------------");
+                }
+                prevGroup = selectedCategory;
                 menuText = newText.toString();
             }
             font.draw(batch, menuText, 30, 16);
-            batch.draw(arrowTexture, 10, (selected + selectedGroup) * h + 13, 16, 16);
+            batch.draw(arrowTexture, 10, selectedCategory * h + 13, 16, 16);
+            if (selectedCategory != 0) {
+                batch.draw(arrowTexture, 10, (categories.length + selected) * h + 13, 16, 16);
+            }
         }
     }
 
@@ -314,9 +320,9 @@ class GUI implements Renderable, InputHandler {
     }
 
     public void setSelectedComponent(int selectedComponent) {
-        selectedGroup = 0;
-        while (selectedComponent > categoryComponentCounts[selectedGroup]) {
-            selectedComponent -= categoryComponentCounts[selectedGroup++];
+        selectedCategory = 0;
+        while (selectedComponent > categoryComponentCounts[selectedCategory]) {
+            selectedComponent -= categoryComponentCounts[selectedCategory++];
         }
         selected = selectedComponent;
     }

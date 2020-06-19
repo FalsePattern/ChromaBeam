@@ -545,7 +545,12 @@ class StuffPlacer implements Renderable, InputHandler {
         if (GlobalData.keyBinds.isJustPressed("scroll_components")) {
             var s = prefabs.size() + 1;
             if (s == 1) return;
-            setSelectedComponent((((selectedComponent + (shiftHeld ? -1 : 1)) % s) + s) % s);
+            selectComponentInCategory(shiftHeld ? -1 : 1);
+        }
+        if (GlobalData.keyBinds.isJustPressed("scroll_categories")) {
+            var s = prefabs.size() + 1;
+            if (s == 1) return;
+            snapToCategory(shiftHeld ? -1 : 1);
         }
         if (current != null) {
             if (GlobalData.keyBinds.isJustPressed("scroll_alternatives")) {
@@ -682,6 +687,37 @@ class StuffPlacer implements Renderable, InputHandler {
                 clicking = false;
             }
         }
+    }
+
+    private void snapToCategory(int delta) {
+        var prevCat = gui.selectedCategory;
+        do {
+            selectComponent(delta);
+        } while (prevCat == gui.selectedCategory);
+        if (delta < 0) {
+            prevCat = gui.selectedCategory;
+            while (prevCat == gui.selectedCategory) {
+                selectComponent(delta);
+            }
+            selectComponent(-delta);
+        }
+    }
+
+    private void selectComponentInCategory(int delta) {
+        var category = gui.selectedCategory;
+        selectComponent(delta);
+        if (delta < 0 && category != gui.selectedCategory) {
+            snapToCategory(1);
+            snapToCategory(1);
+            selectComponent(-1);
+        } else if (delta > 0 && category != gui.selectedCategory) {
+            snapToCategory(-1);
+        }
+    }
+
+    private void selectComponent(int delta) {
+        var s = prefabs.size() + 1;
+        setSelectedComponent((((selectedComponent + delta) % s) + s) % s);
     }
 
     private void setSelectedComponent(int newSel) {

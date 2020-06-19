@@ -2,7 +2,7 @@ apply plugin: "eclipse"
 apply plugin: "java"
 apply plugin: "java-library"
 
-def version = '0.6.0'
+def version = '0.6.0-preview0'
 def gdxVersion = '1.9.10'
 ext {
     appName = "chromabeam"
