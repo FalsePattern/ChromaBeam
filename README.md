@@ -146,6 +146,7 @@ Used by the Duplicator to create the IO ports on the circuit that will be create
     Delete components:    Right click
     Pick component:    Shift + Middle click
     Move camera:    Middle click + mouse movement
+    Zoom in/out: Scrollwheel
 
 ## Component menu navigation (you can hold shift to do these in the opposite direction):
     Switch between component categories:    T
