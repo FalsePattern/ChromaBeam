@@ -65,22 +65,6 @@ Works like a mirror, but both sides are reflective.
 Reflects beams like a mirror, but also lets them through, creating two beams in a right angle.
 </details>
 
-## Colored
-<details>
-  <summary>Click to expand</summary>
-  
-### RGB emitter
-Emits a beam with any of the colors.<br>
-(8 alt. colors: X, R, G, Y, B, M, C, W)
-### Colored beam splitter
-Splits beams based on their color channels.<br>
-Channels that match any channel of the splitter will go through straight, while the rest will be reflected like a mirror.<br>
-(6 alt. colors: R, G, Y, B, M, C)
-### Colored filter
-Only lets through beam channels that match any of the filter's channels.<br>
-(6 alt. colors: R, G, Y, B, M, C)
-</details>
-
 ## Logic
 <details>
   <summary>Click to expand</summary>
@@ -97,6 +81,27 @@ Lets beams pass through when the switch has any incoming signal.<br>
 Beams pass through in 0 ticks, but the switch takes 1 tick to process changes.
 ### Delayer
 Takes the input beam and emits it 1 tick later.
+### Oracle
+When it receives an input, it either emits a white beam or nothing for the duration of the input pulse.<br>
+The emitted value is non-deterministic.
+</details>
+
+## Colored
+<details>
+  <summary>Click to expand</summary>
+  
+### RGB emitter
+Emits a beam with any of the colors.<br>
+(8 alt. colors: X, R, G, Y, B, M, C, W)
+### Colored beam splitter
+Splits beams based on their color channels.<br>
+Channels that match any channel of the splitter will go through straight, while the rest will be reflected like a mirror.<br>
+(6 alt. colors: R, G, Y, B, M, C)
+### Colored filter
+Only lets through beam channels that match any of the filter's channels.<br>
+(6 alt. colors: R, G, Y, B, M, C)
+### RGB Oracle
+Works like the Oracle, but with all 8 colors.
 </details>
 
 ## IO
