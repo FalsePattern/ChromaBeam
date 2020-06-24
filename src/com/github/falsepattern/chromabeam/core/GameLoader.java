@@ -39,10 +39,12 @@ public class GameLoader extends ApplicationAdapter {
     private Thread crashWatcher;
     private Thread simThread;
     private Runnable simulation;
-
-    public GameLoader(Mod[] mods) {
+    private final long startNano;
+    public GameLoader(Mod[] mods, long startNano) {
         this.mods = mods;
+        this.startNano = startNano;
     }
+    @SuppressWarnings({"BusyWait", "StatementWithEmptyBody"})
     @Override
     public void create() {
         CoreData.kryo = new Kryo();
@@ -155,6 +157,8 @@ public class GameLoader extends ApplicationAdapter {
         //preInitialization
         var assetRegistry = new AssetRegistry(finalResourcePack);
         for (var mod: mods) {
+            var modid = mod.getModid();
+            if (!(modid.equals("core") || modid.equals("circuit")))
             System.out.println("PreInitializing mod " + mod.getModid());
             mod.preInitialization(assetRegistry);
         }
@@ -164,6 +168,8 @@ public class GameLoader extends ApplicationAdapter {
         //initialization
         componentRegistry = new ComponentRegistry();
         for (var mod: mods) {
+            var modid = mod.getModid();
+            if (!(modid.equals("core") || modid.equals("circuit")))
             System.out.println("Initializing mod " + mod.getModid());
             componentRegistry.setLoadingMod(mod);
             mod.initialization(componentRegistry);
@@ -176,11 +182,13 @@ public class GameLoader extends ApplicationAdapter {
         GlobalData.inputMultiplexer.addProcessor(worldSpaceRenderer);
         var reg = new PostInitializationRegistry(screenSpaceRenderer, worldSpaceRenderer, inputHandlerManager);
         for (var mod: mods) {
+            var modid = mod.getModid();
+            if (!(modid.equals("core") || modid.equals("circuit")))
             System.out.println("PostInitializing mod " + mod.getModid());
             mod.postInitialization(reg);
         }
 
-        System.out.println(mods.length + " mod" + (mods.length != 1 ? "s" : "") + " loaded!");
+        System.out.println(mods.length - 2 + " mod" + (mods.length - 2 != 1 ? "s" : "") + " loaded!");
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
 
         Gdx.graphics.setVSync(true);
@@ -189,22 +197,11 @@ public class GameLoader extends ApplicationAdapter {
             mod.worldInitialization(world);
         }
         System.out.println("Game world created! Welcome to ChromaBeam!");
-        var comps = SaveEngine.loadComponentsFromFile(CoreData.kryo);
-        if (comps != null) {
-            world.pause();
-            for (var comp : comps.A) {
-                world.setComponent(comp);
-            }
-            world.unpause();
-            for (var label: comps.B.entrySet()) {
-                var pos = label.getKey();
-                world.setLabel(pos[0], pos[1], label.getValue());
-            }
-        }
         simThread = new Thread(simulation);
         simThread.start();
         crashWatcher.start();
         GlobalData.soundManager.play("welcome");
+        System.out.println("Total load time: " + (System.nanoTime() - startNano) / 1000000000f + " s");
     }
 
     @Override
@@ -245,7 +242,11 @@ public class GameLoader extends ApplicationAdapter {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        SaveEngine.saveComponentsToFile(CoreData.kryo, world.getAllComponents(), world.getAllLabels());
+        var frame = new JFrame();
+        var prompt = JOptionPane.showConfirmDialog(frame, "Would you like to save the current world to disk?", "Qutting game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (prompt == JOptionPane.YES_OPTION) {
+            SaveEngine.saveComponentsToFile(CoreData.kryo, world.getAllComponents(), world.getAllLabels());
+        }
         GlobalData.textureManager.dispose();
         GlobalData.soundManager.dispose();
         worldSpaceRenderer.dispose();

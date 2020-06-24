@@ -20,7 +20,9 @@ public class DesktopLauncher {
 	private static List<File> modFiles;
 	private static FileOutputStream logStream;
 	private static boolean instrumented = false;
+	private static long startNano = 0;
 	public static void premain(String args, Instrumentation instrumentation) throws FileNotFoundException {
+		startNano = System.nanoTime();
 		logStream = new FileOutputStream("log.txt");
 		var sysOutStream = System.out;
 		var sysErrStream = System.err;
@@ -87,7 +89,7 @@ public class DesktopLauncher {
 			mods.add(new CircuitMod());
 			config.setTitle("ChromaBeam");
 			config.setWindowIcon("icon.png");
-			new Lwjgl3Application(new GameLoader(mods.toArray(Mod[]::new)), config);
+			new Lwjgl3Application(new GameLoader(mods.toArray(Mod[]::new), startNano), config);
 		} finally {
 			logStream.close();
 		}
@@ -111,6 +113,7 @@ public class DesktopLauncher {
 		return mainModClasses;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static Class<? extends Mod> getMainModFile(String name) {
 		if (!name.endsWith(".class")) return null;
 		try {

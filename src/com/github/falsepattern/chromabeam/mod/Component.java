@@ -13,6 +13,8 @@ import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The class representing components in the world. You should probably extend {@link BasicComponent}.
@@ -469,8 +471,8 @@ public abstract class Component implements KryoSerializable {
         var coreVer = GlobalData.modsInLoadedSave.get("core");
         if (!(coreVer.equals("0.3.0") || coreVer.equals("0.3.1"))) {
             int customDataLength = input.readInt();
-            byte[] customData = input.readBytes(customDataLength);
-            input = new Input(new ByteArrayInputStream(customData));
+            var stream = input.readBytes(customDataLength);
+            input = new Input(new ByteArrayInputStream(stream));
         }
         deserializeCustomData(kryo, input);
         setup();

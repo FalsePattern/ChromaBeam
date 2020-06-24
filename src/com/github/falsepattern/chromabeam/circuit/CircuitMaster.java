@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.IntMap;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.github.falsepattern.chromabeam.core.GlobalData;
+import com.github.falsepattern.chromabeam.core.SaveEngine;
 import com.github.falsepattern.chromabeam.mod.BasicComponent;
 import com.github.falsepattern.chromabeam.mod.Component;
 import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
@@ -13,12 +15,12 @@ import com.github.falsepattern.chromabeam.util.Vector2i;
 import com.github.falsepattern.chromabeam.util.storage.UnsafeList;
 import com.github.falsepattern.chromabeam.world.BetterWorld;
 
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public class CircuitMaster extends BasicComponent {
-    private IntMap<CircuitIOPort> parentPorts = new IntMap<>();
-    private IntMap<CircuitIOPortVirtual> childPorts = new IntMap<>();
+    private final IntMap<CircuitIOPort> parentPorts = new IntMap<>();
+    private final IntMap<CircuitIOPortVirtual> childPorts = new IntMap<>();
     public UnsafeList<Component> slaves = new UnsafeList<>();
     private World childWorld;
     private World parentWorld;
@@ -26,17 +28,17 @@ public class CircuitMaster extends BasicComponent {
     private int height;
     private boolean deleting = false;
     private boolean unBuilt = true;
+    private int rawArea = 0;
+    private int[] storedLabelPositions = new int[0];
+    private String[] storedLabels = new String[0];
     public CircuitMaster() {
         super(1, "circuit.body", "circuit");
     }
 
-    @Override
-    public void emitInitialBeams(MaskedWorld world) {
-        childWorld.emitInitialBeams();
-        childWorld.resolveBeams();
-    }
-
+    @SuppressWarnings("SuspiciousSystemArraycopy")
     public void create(World parentWorld, Vector2i posA, Vector2i posB) {
+        var labelStorePosBuilder = new UnsafeList<Integer>();
+        var labelStoreTextBuilder = new UnsafeList<String>();
         unBuilt = false;
         int channel = 0;
         UnsafeList<UnsafeList<CircuitIOPort>> ports = new UnsafeList<>();
@@ -52,25 +54,44 @@ public class CircuitMaster extends BasicComponent {
         for (int y = y2; y >= y1; y--) {
             for (int x = x1; x <= x2; x++) {
                 var comp = parentWorld.removeComponent(x, y);
-                if (comp == null) continue;
-                if (comp instanceof CircuitMaster) {
-                    ((CircuitMaster) comp).parentWorld = childWorld;
-                } else if (comp instanceof CircuitIOPortVirtual) {
-                    var vp = (CircuitIOPortVirtual) comp;
-                    var rp = new CircuitIOPort();
-                    rp.setRotation((vp.getRotation() + 2 ) % 4);
-                    rp.linkID = vp.linkID = channel;
-                    rp.master = vp.master = this;
-                    slaves.add(rp);
-                    childPorts.put(channel, vp);
-                    parentPorts.put(channel, rp);
-                    ports.get(rp.getRotation()).add(rp);
-                    channel++;
+                if (!(comp == null || comp instanceof CircuitSlave)) {
+                    if (comp instanceof CircuitMaster) {
+                        var master = (CircuitMaster) comp;
+                        master.parentWorld = childWorld;
+                        rawArea += master.rawArea;
+                    } else if (comp instanceof CircuitIOPortVirtual) {
+                        var vp = (CircuitIOPortVirtual) comp;
+                        var rp = new CircuitIOPort();
+                        rp.setRotation((vp.getRotation() + 2) % 4);
+                        rp.linkID = vp.linkID = channel;
+                        rp.master = vp.master = this;
+                        slaves.add(rp);
+                        childPorts.put(channel, vp);
+                        parentPorts.put(channel, rp);
+                        ports.get(rp.getRotation()).add(rp);
+                        channel++;
+                    } else {
+                        rawArea++;
+                    }
+                    childWorld.setComponent(comp);
                 }
-                childWorld.setComponent(comp);
+                var label = parentWorld.getLabel(x, y);
+                if (!(label == null || label.trim().equals(""))) {
+                    labelStorePosBuilder.add(x);
+                    labelStorePosBuilder.add(y);
+                    labelStoreTextBuilder.add(label);
+                }
+                parentWorld.removeLabel(x, y);
             }
         }
-        setupParentWorldChip(x1, y2, ports);
+        setupParentWorldChip(x1, y2, ports, rawArea);
+        storedLabelPositions = new int[labelStorePosBuilder.size()];
+        var st = labelStorePosBuilder.storage;
+        for (int i = 0; i < storedLabelPositions.length; i++) {
+            storedLabelPositions[i] = (int)st[i];
+        }
+        storedLabels = new String[labelStoreTextBuilder.size()];
+        System.arraycopy(labelStoreTextBuilder.storage, 0, storedLabels, 0, storedLabels.length);
     }
 
     @Override
@@ -105,6 +126,13 @@ public class CircuitMaster extends BasicComponent {
             }
             childWorld.setComponent(clone);
         }
+        width = origMaster.width;
+        height = origMaster.height;
+        rawArea = origMaster.rawArea;
+        storedLabelPositions = new int[origMaster.storedLabelPositions.length];
+        storedLabels = new String[origMaster.storedLabels.length];
+        System.arraycopy(origMaster.storedLabelPositions, 0, storedLabelPositions, 0, storedLabelPositions.length);
+        System.arraycopy(origMaster.storedLabels, 0, storedLabels, 0, storedLabels.length);
     }
 
     @Override
@@ -118,9 +146,12 @@ public class CircuitMaster extends BasicComponent {
         }
     }
 
-    private void setupParentWorldChip(int xPos, int yPos, List<? extends List<CircuitIOPort>> ports) {
+    private void setupParentWorldChip(int xPos, int yPos, List<? extends List<CircuitIOPort>> ports, int minimumArea) {
         width = Math.max(ports.get(1).size(), ports.get(3).size()) + 2;
         height = Math.max(ports.get(0).size(), ports.get(2).size()) + 2;
+        while (((width - 2) * (height - 2) * 8) < minimumArea) {
+            if (height < width) height++; else width++;
+        }
         setupCornerAndFill(xPos, yPos, width, height);
         placePorts(ports.get(0), height - 2, (i) -> xPos, (i) -> yPos - 1 - i);
         placePorts(ports.get(1), width - 2, (i) -> xPos + 1 + i, (i) -> yPos);
@@ -177,36 +208,6 @@ public class CircuitMaster extends BasicComponent {
         unBuilt = true;
     }
 
-    @Override
-    protected void serializeCustomData(Kryo kryo, Output output) {
-        kryo.writeClassAndObject(output, childWorld);
-        output.writeInt(width);
-        output.writeInt(height);
-        output.writeInt(slaves.size());
-        for (var slave: slaves) {
-            var cln = slave.createClone();
-            cln.setPos(slave.getX() - x, slave.getY() - y);
-            kryo.writeClassAndObject(output, cln);
-        }
-    }
-
-    @Override
-    protected void deserializeCustomData(Kryo kryo, Input input) {
-        childWorld = (World)kryo.readClassAndObject(input);
-        width = input.readInt();
-        height = input.readInt();
-        int slaveCount = input.readInt();
-        for (int i = 0; i < slaveCount; i++) {
-            var slave = (CircuitSlave)kryo.readClassAndObject(input);
-            slave.master = this;
-            slaves.add(slave);
-            if (slave instanceof CircuitIOPort) {
-                var port = (CircuitIOPort) slave;
-                parentPorts.put(port.linkID, port);
-            }
-        }
-        findVirtualPorts();
-    }
 
     void undelete(Component component) {
         if (!deleting) {
@@ -234,6 +235,70 @@ public class CircuitMaster extends BasicComponent {
         var port = childPorts.get(linkID);
         childWorld.createBeam(port.getX(), port.getY(), (port.getRotation() + 2) % 4, color);
         childWorld.resolveBeams();
+    }
+
+    @Override
+    public void emitInitialBeams(MaskedWorld world) {
+        childWorld.emitInitialBeams();
+        childWorld.resolveBeams();
+    }
+
+
+    @Override
+    protected void serializeCustomData(Kryo kryo, Output output) {
+        SaveEngine.serializeComponents(kryo, output, childWorld.getAllComponents());
+        output.writeInt(width);
+        output.writeInt(height);
+        output.writeInt(rawArea);
+        output.writeInt(slaves.size());
+        for (var slave: slaves) {
+            var cln = slave.createClone();
+            cln.setPos(slave.getX() - x, slave.getY() - y);
+            kryo.writeClassAndObject(output, cln);
+        }
+        output.writeInt(storedLabels.length);
+        output.writeInts(storedLabelPositions, 0, storedLabelPositions.length);
+        for (int i = 0; i < storedLabels.length; i++) {
+            output.writeString(storedLabels[i]);
+        }
+    }
+
+    @Override
+    protected void deserializeCustomData(Kryo kryo, Input input) {
+        childWorld = new BetterWorld();
+        var components = SaveEngine.deserializeComponents(kryo, input);
+        for (int i = 0; i < components.length; i++) {
+            childWorld.setComponent(components[i]);
+        }
+        width = input.readInt();
+        height = input.readInt();
+        rawArea = input.readInt();
+        int slaveCount = input.readInt();
+        for (int i = 0; i < slaveCount; i++) {
+            var slave = (CircuitSlave)kryo.readClassAndObject(input);
+            slave.master = this;
+            slaves.add(slave);
+            if (slave instanceof CircuitIOPort) {
+                var port = (CircuitIOPort) slave;
+                parentPorts.put(port.linkID, port);
+            }
+        }
+        storedLabels = new String[input.readInt()];
+        storedLabelPositions = input.readInts(storedLabels.length * 2);
+        for (int i = 0; i < storedLabels.length; i++) {
+            storedLabels[i] = input.readString();
+        }
+        findVirtualPorts();
+    }
+
+    public void exportChildWorld(Kryo kryo) {
+        var labelMap = new HashMap<int[], String>();
+        for (int i = 0; i < storedLabels.length; i++) {
+            labelMap.put(new int[]{storedLabelPositions[i * 2], storedLabelPositions[i * 2 + 1]}, storedLabels[i]);
+        }
+        if (SaveEngine.saveComponentsToFile(kryo, childWorld.getAllComponents(), labelMap)) {
+            GlobalData.soundManager.play("saved");
+        }
     }
 
     @Override

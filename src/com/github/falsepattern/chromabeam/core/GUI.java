@@ -104,13 +104,15 @@ class GUI implements Renderable, InputHandler {
                         "\n\nFlip: " + flip +
                         "\n\nMove left: " + left + ", right: " + right + ", up: " + up + ", down:" + down +
                         "\n\nReturn to selection: " + cancel,
-                "Press " + getBindName("keybind_hints") + " to toggle keybinding hints",
+                "Press " + getBindName("keybind_hints") + " to show controls",
                 "Place: Left click       Delete: Right click       Pick component: Shift + Middle click" +
+                        "\n\nMove camera: Middle click + Drag" +
                         "\n\nNext Component: " + comp + "       Previous Component: Shift + " + comp +
                         "\n\nNext Category: " + cat + "       Previous Category: Shift + " + cat +
                         "\n\nNext Alternative: " + alt + "       Previous Alternative: Shift + " + alt +
                         "\n\nRotate Clockwise: " + rot + "       Rotate Counter-Clockwise: Shift + " + rot +
                         "\n\nFlip: " + flip +
+                        "\n\nExport hovered circuit to file: " + getBindName("export_circuit") +
                         "\n\nOpen Duplicator: " + getBindName("duplicator") +
                         "\n\nPlace label: " + label + "       Remove label: SHIFT + " + label +
                         "\n\nSave/Load menu: " + getBindName("saveload") +

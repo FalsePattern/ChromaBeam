@@ -17,7 +17,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class SaveEngine {
-    static ImmutablePair<Component[], Map<int[], String>> loadComponentsFromFile(Kryo kryo) {
+    public static ImmutablePair<Component[], Map<int[], String>> loadComponentsFromFile(Kryo kryo) {
         var parentFrame = new JFrame();
         var chooser = createChooser();
         int userSelection = chooser.showDialog(parentFrame, "Load");
@@ -113,7 +113,7 @@ public class SaveEngine {
         return null;
     }
 
-    static boolean saveComponentsToFile(Kryo kryo, Component[] components, Map<int[], String> labels) {
+    public static boolean saveComponentsToFile(Kryo kryo, Component[] components, Map<int[], String> labels) {
         var parentFrame = new JFrame();
         var chooser = createChooser();
         int userSelection = chooser.showDialog(parentFrame, "Save");

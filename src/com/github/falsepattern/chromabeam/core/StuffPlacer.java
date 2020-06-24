@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryo.Kryo;
+import com.github.falsepattern.chromabeam.circuit.CircuitIOPort;
 import com.github.falsepattern.chromabeam.circuit.CircuitMaster;
 import com.github.falsepattern.chromabeam.circuit.CircuitSlave;
 import com.github.falsepattern.chromabeam.graphics.DrawingHelpers;
@@ -76,14 +77,7 @@ class StuffPlacer implements Renderable, InputHandler {
                 renderSelecting(batch);
                 renderStacking(batch);
             }
-            case CIRCUIT -> {
-                renderCircuiting(batch);
-            }
         }
-    }
-
-    private void renderCircuiting(SpriteBatch batch) {
-
     }
 
     private void renderStacking(SpriteBatch batch) {
@@ -209,7 +203,6 @@ class StuffPlacer implements Renderable, InputHandler {
             case CUTPASE -> handleCutPasteInput(shiftHeld);
             case STACKPRIME -> handleStackPrimeInput(shiftHeld);
             case STACKEXECUTE -> handleStackExecuteInput(shiftHeld);
-            case CIRCUIT -> handleCircuitInput(shiftHeld);
         }
 
         if (current != prev && clicking) {
@@ -218,10 +211,6 @@ class StuffPlacer implements Renderable, InputHandler {
             if (current != null)
                 current.clickStart();
         }
-    }
-
-    private void handleCircuitInput(boolean shiftHeld) {
-
     }
 
     private int stackCount = 1;
@@ -405,7 +394,7 @@ class StuffPlacer implements Renderable, InputHandler {
 
     private void handleCopyPasteInput(boolean shiftHeld) {
         handleSelectionTransforms(shiftHeld);
-        if ((!overlapping || shiftHeld) && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+        if (!overlapping && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             for (var comp : clonedComponents.a) {
                 if (! (comp instanceof CircuitSlave))
                 world.cloneComponent(comp.getX() + x, comp.getY() + y, comp.getRotation(), comp.getFlipped(), comp);
@@ -533,9 +522,10 @@ class StuffPlacer implements Renderable, InputHandler {
     }
 
     private enum State {
-        PLACE, SELECT, COPYPASTE, CUTPASE, STACKPRIME, CIRCUIT, STACKEXECUTE
+        PLACE, SELECT, COPYPASTE, CUTPASE, STACKPRIME, STACKEXECUTE
     }
 
+    @SuppressWarnings("BusyWait")
     private void handlePlacerInput(boolean shiftHeld) {
         if (GlobalData.keyBinds.isJustPressed("duplicator")) {
             state = State.SELECT;
@@ -543,32 +533,37 @@ class StuffPlacer implements Renderable, InputHandler {
             return;
         }
         if (GlobalData.keyBinds.isJustPressed("scroll_components")) {
-            var s = prefabs.size() + 1;
-            if (s == 1) return;
-            selectComponentInCategory(shiftHeld ? -1 : 1);
+            var s = prefabs.size();
+            if (s == 0) return;
+            selectComponent(shiftHeld ? -1 : 1);
         }
         if (GlobalData.keyBinds.isJustPressed("scroll_categories")) {
             var s = prefabs.size() + 1;
             if (s == 1) return;
             snapToCategory(shiftHeld ? -1 : 1);
         }
+        if (worldComponent != null) {
+            if (GlobalData.keyBinds.isJustPressed("export_circuit") && (worldComponent instanceof CircuitMaster || worldComponent instanceof CircuitSlave))
+                (worldComponent instanceof CircuitSlave ? ((CircuitSlave) worldComponent).master : (CircuitMaster) worldComponent).exportChildWorld(kryo);
+        }
         if (current != null) {
-            if (GlobalData.keyBinds.isJustPressed("scroll_alternatives")) {
-                if (shiftHeld)
-                    current.prevAlternative();
-                else
-                    current.nextAlternative();
-            }
+            if (!(current instanceof CircuitSlave) && !(current instanceof CircuitMaster)) {
+                if (GlobalData.keyBinds.isJustPressed("scroll_alternatives")) {
+                    if (shiftHeld)
+                        current.prevAlternative();
+                    else
+                        current.nextAlternative();
+                }
 
-            if (GlobalData.keyBinds.isJustPressed("flip")) {
-                current.setFlipped(!current.getFlipped());
-            }
+                if (GlobalData.keyBinds.isJustPressed("flip")) {
+                    current.setFlipped(!current.getFlipped());
+                }
 
-            if (GlobalData.keyBinds.isJustPressed("rotate")) {
-                current.addRotation(shiftHeld ? -1 : 1);
+                if (GlobalData.keyBinds.isJustPressed("rotate")) {
+                    current.addRotation(shiftHeld ? -1 : 1);
+                }
             }
         }
-
         if (GlobalData.keyBinds.isJustPressed("label")) {
             if (shiftHeld) {
                 if (!world.getLabel(x, y).equals("")) {
@@ -655,14 +650,25 @@ class StuffPlacer implements Renderable, InputHandler {
             GlobalData.soundManager.play("place");
         }
         if (!empty && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            world.removeComponent(x, y);
+            var comp = world.getComponent(x, y);
+            if (comp instanceof CircuitSlave) {
+                var master = ((CircuitSlave) comp).master;
+                world.removeComponent(master.getX(), master.getY());
+            } else {
+                world.removeComponent(x, y);
+            }
             GlobalData.soundManager.play("delete");
         }
         if (shiftHeld && Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
             if (worldComponent == null) {
                 setSelectedComponent(0);
             } else {
-                var reg = worldComponent.getRegistryName();
+                String reg;
+                if (worldComponent instanceof CircuitIOPort) {
+                    reg = "circuit.input";
+                } else {
+                        reg = worldComponent.getRegistryName();
+                }
                 var option = prefabs.stream().filter((prefab) -> prefab.getRegistryName().equals(reg)).findFirst();
                 if (option.isPresent()) {
                     var id = prefabs.indexOf(option.get()) + 1;
@@ -674,6 +680,7 @@ class StuffPlacer implements Renderable, InputHandler {
                     }
                 } else {
                     setSelectedComponent(0);
+                    GlobalData.soundManager.play("error");
                 }
             }
         }
@@ -700,18 +707,6 @@ class StuffPlacer implements Renderable, InputHandler {
                 selectComponent(delta);
             }
             selectComponent(-delta);
-        }
-    }
-
-    private void selectComponentInCategory(int delta) {
-        var category = gui.selectedCategory;
-        selectComponent(delta);
-        if (delta < 0 && category != gui.selectedCategory) {
-            snapToCategory(1);
-            snapToCategory(1);
-            selectComponent(-1);
-        } else if (delta > 0 && category != gui.selectedCategory) {
-            snapToCategory(-1);
         }
     }
 

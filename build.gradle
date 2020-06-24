@@ -1,17 +1,8 @@
-apply plugin: "eclipse"
 apply plugin: "java"
 apply plugin: "java-library"
 
-def version = '0.6.0-preview0'
+def version = '0.6.0'
 def gdxVersion = '1.9.10'
-ext {
-    appName = "chromabeam"
-    roboVMVersion = '2.3.8'
-    box2DLightsVersion = '1.4'
-    ashleyVersion = '1.7.0'
-    aiVersion = '1.8.0'
-}
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -112,6 +103,3 @@ task mdk(type: Jar) {
     with jar
 }
 mdk.dependsOn sourcesJar, javadocJar
-
-
-eclipse.project.name = appName + "-desktop"
