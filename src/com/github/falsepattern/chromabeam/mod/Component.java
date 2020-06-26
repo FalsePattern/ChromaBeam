@@ -1,25 +1,22 @@
 package com.github.falsepattern.chromabeam.mod;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoSerializable;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.github.falsepattern.chromabeam.core.GlobalData;
 import com.github.falsepattern.chromabeam.mod.interfaces.World;
 import com.github.falsepattern.chromabeam.util.Color;
 import com.github.falsepattern.chromabeam.util.Vector2i;
 import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
+import com.github.falsepattern.chromabeam.util.serialization.ChromaSerializable;
+import com.github.falsepattern.chromabeam.util.serialization.Deserializer;
+import com.github.falsepattern.chromabeam.util.serialization.Serializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * The class representing components in the world. You should probably extend {@link BasicComponent}.
  */
-public abstract class Component implements KryoSerializable {
+public abstract class Component implements ChromaSerializable {
 
     /**
      * Called at the start of every tick. Initial beam emissions by components are done in this phase.
@@ -67,18 +64,16 @@ public abstract class Component implements KryoSerializable {
     /**
      * Called after the basic properties of the component have been loaded from the save. Components must load values
      * they saved here.
-     * @param kryo The kryo deserializer instance.
-     * @param input The Kryo input stream the save is being loaded from.
+     * @param input The deserializer the save is being loaded from.
      */
-    protected abstract void deserializeCustomData(Kryo kryo, Input input);
+    protected abstract void deserializeCustomData(Deserializer input);
 
     /**
      * Called after the basic properties of the component have been saved to disk. Components must save custom data
      * information here.
-     * @param kryo The kryo serializer instance.
-     * @param output The Kryo input stream the save is being saved to.
+     * @param output The serializer the save is being saved to.
      */
-    protected abstract void serializeCustomData(Kryo kryo, Output output);
+    protected abstract void serializeCustomData(Serializer output);
 
     /**
      * Create a new, unitialized instance of the current component.
@@ -445,22 +440,28 @@ public abstract class Component implements KryoSerializable {
     }
 
     @Override
-    public void write(Kryo kryo, Output output) {
+    public void write(Serializer output) {
         output.writeInt(x);
         output.writeInt(y);
         output.writeInt(rotation);
         output.writeInt(alternativeID);
         output.writeBoolean(flipped);
-        var customOutput = new Output(new ByteArrayOutputStream());
-        serializeCustomData(kryo, customOutput);
-        byte[] serializedData = customOutput.toBytes();
+        var buf = new ByteArrayOutputStream();
+        var customOutput = new Serializer(buf);
+        serializeCustomData(customOutput);
+        try {
+            customOutput.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        byte[] serializedData = buf.toByteArray();
         output.writeInt(serializedData.length);
         output.writeBytes(serializedData);
 
     }
 
     @Override
-    public void read(Kryo kryo, Input input) {
+    public void read(Deserializer input) {
         x = input.readInt();
         y = input.readInt();
         rotation = input.readInt();
@@ -472,9 +473,9 @@ public abstract class Component implements KryoSerializable {
         if (!(coreVer.equals("0.3.0") || coreVer.equals("0.3.1"))) {
             int customDataLength = input.readInt();
             var stream = input.readBytes(customDataLength);
-            input = new Input(new ByteArrayInputStream(stream));
+            input = new Deserializer(new ByteArrayInputStream(stream));
         }
-        deserializeCustomData(kryo, input);
+        deserializeCustomData(input);
         setup();
     }
 }

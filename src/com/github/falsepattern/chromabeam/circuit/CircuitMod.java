@@ -40,6 +40,6 @@ public class CircuitMod implements Mod {
 
     @Override
     public String getVersion() {
-        return "0.6.0";
+        return "0.7-dev";
     }
 }

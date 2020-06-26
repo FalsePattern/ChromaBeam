@@ -1,12 +1,8 @@
 package com.github.falsepattern.chromabeam.util;
 
 import com.badlogic.gdx.math.Vector2;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoSerializable;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 
-public class Vector2i implements KryoSerializable {
+public class Vector2i {
     public int x;
     public int y;
 
@@ -122,15 +118,4 @@ public class Vector2i implements KryoSerializable {
         return "(x: " + x + ", y: " + y + ")";
     }
 
-    @Override
-    public void write(Kryo kryo, Output output) {
-        output.writeInt(x);
-        output.writeInt(y);
-    }
-
-    @Override
-    public void read(Kryo kryo, Input input) {
-        x = input.readInt();
-        y = input.readInt();
-    }
 }

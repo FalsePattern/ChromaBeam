@@ -2,9 +2,6 @@ package com.github.falsepattern.chromabeam.circuit;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.IntMap;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.github.falsepattern.chromabeam.core.GlobalData;
 import com.github.falsepattern.chromabeam.core.SaveEngine;
 import com.github.falsepattern.chromabeam.mod.BasicComponent;
@@ -12,6 +9,8 @@ import com.github.falsepattern.chromabeam.mod.Component;
 import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
 import com.github.falsepattern.chromabeam.mod.interfaces.World;
 import com.github.falsepattern.chromabeam.util.Vector2i;
+import com.github.falsepattern.chromabeam.util.serialization.Deserializer;
+import com.github.falsepattern.chromabeam.util.serialization.Serializer;
 import com.github.falsepattern.chromabeam.util.storage.UnsafeList;
 import com.github.falsepattern.chromabeam.world.BetterWorld;
 
@@ -245,8 +244,8 @@ public class CircuitMaster extends BasicComponent {
 
 
     @Override
-    protected void serializeCustomData(Kryo kryo, Output output) {
-        SaveEngine.serializeComponents(kryo, output, childWorld.getAllComponents());
+    protected void serializeCustomData(Serializer output) {
+        SaveEngine.serializeComponents(output, childWorld.getAllComponents());
         output.writeInt(width);
         output.writeInt(height);
         output.writeInt(rawArea);
@@ -254,19 +253,19 @@ public class CircuitMaster extends BasicComponent {
         for (var slave: slaves) {
             var cln = slave.createClone();
             cln.setPos(slave.getX() - x, slave.getY() - y);
-            kryo.writeClassAndObject(output, cln);
+            output.writeObject(cln);
         }
         output.writeInt(storedLabels.length);
         output.writeInts(storedLabelPositions, 0, storedLabelPositions.length);
         for (int i = 0; i < storedLabels.length; i++) {
-            output.writeString(storedLabels[i]);
+            output.writeAsciiString(storedLabels[i]);
         }
     }
 
     @Override
-    protected void deserializeCustomData(Kryo kryo, Input input) {
+    protected void deserializeCustomData(Deserializer input) {
         childWorld = new BetterWorld();
-        var components = SaveEngine.deserializeComponents(kryo, input);
+        var components = SaveEngine.deserializeComponents(input);
         for (int i = 0; i < components.length; i++) {
             childWorld.setComponent(components[i]);
         }
@@ -275,7 +274,7 @@ public class CircuitMaster extends BasicComponent {
         rawArea = input.readInt();
         int slaveCount = input.readInt();
         for (int i = 0; i < slaveCount; i++) {
-            var slave = (CircuitSlave)kryo.readClassAndObject(input);
+            var slave = (CircuitSlave)input.readObject();
             slave.master = this;
             slaves.add(slave);
             if (slave instanceof CircuitIOPort) {
@@ -291,12 +290,12 @@ public class CircuitMaster extends BasicComponent {
         findVirtualPorts();
     }
 
-    public void exportChildWorld(Kryo kryo) {
+    public void exportChildWorld() {
         var labelMap = new HashMap<int[], String>();
         for (int i = 0; i < storedLabels.length; i++) {
             labelMap.put(new int[]{storedLabelPositions[i * 2], storedLabelPositions[i * 2 + 1]}, storedLabels[i]);
         }
-        if (SaveEngine.saveComponentsToFile(kryo, childWorld.getAllComponents(), labelMap)) {
+        if (SaveEngine.saveComponentsToFile(childWorld.getAllComponents(), labelMap)) {
             GlobalData.soundManager.play("saved");
         }
     }

@@ -5,19 +5,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.github.falsepattern.chromabeam.core.GlobalData;
 import com.github.falsepattern.chromabeam.graphics.DrawingHelpers;
-import com.github.falsepattern.chromabeam.mod.BeamCollision;
 import com.github.falsepattern.chromabeam.mod.Component;
-import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
-
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ComponentDrawHelper {
     private int[][][] intsBackBuffer;

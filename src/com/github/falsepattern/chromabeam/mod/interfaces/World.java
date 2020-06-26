@@ -3,13 +3,13 @@ package com.github.falsepattern.chromabeam.mod.interfaces;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.esotericsoftware.kryo.KryoSerializable;
 import com.github.falsepattern.chromabeam.util.Vector2i;
 import com.github.falsepattern.chromabeam.mod.Component;
+import com.github.falsepattern.chromabeam.util.serialization.ChromaSerializable;
 
 import java.util.Map;
 
-public interface World extends KryoSerializable {
+public interface World extends ChromaSerializable {
 
     void emitInitialBeams();
     void resolveBeams();

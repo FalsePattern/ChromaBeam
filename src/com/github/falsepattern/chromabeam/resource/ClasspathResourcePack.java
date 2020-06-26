@@ -1,8 +1,6 @@
 package com.github.falsepattern.chromabeam.resource;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.github.falsepattern.chromabeam.util.FakeFileHandle;
 
 import java.io.IOException;

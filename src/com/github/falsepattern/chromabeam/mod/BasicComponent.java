@@ -1,11 +1,11 @@
 package com.github.falsepattern.chromabeam.mod;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
 import com.github.falsepattern.chromabeam.mod.interfaces.World;
+import com.github.falsepattern.chromabeam.util.serialization.Deserializer;
+import com.github.falsepattern.chromabeam.util.serialization.Serializer;
 
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -48,9 +48,9 @@ public abstract class BasicComponent extends Component{
     @Override
     protected void cloneDataFromOriginal(Component original) {}
     @Override
-    protected void serializeCustomData(Kryo kryo, Output output) {}
+    protected void serializeCustomData(Serializer output) {}
     @Override
-    protected void deserializeCustomData(Kryo kryo, Input input) {}
+    protected void deserializeCustomData(Deserializer input) {}
 
     @Override
     public void clickStart() {

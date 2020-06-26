@@ -50,7 +50,7 @@ public class CoreMod implements Mod {
         cameraMover = new CameraMover();
         worldRenderable = new WorldRenderable();
         backgroundRenderable = new BackgroundRenderable();
-        stuffPlacer = new StuffPlacer(GlobalData.textureManager.getTexture("beam"), gui, CoreData.kryo);
+        stuffPlacer = new StuffPlacer(GlobalData.textureManager.getTexture("beam"), gui);
         stuffPlacer.setComponentRegistry(registry);
         gui.initArrowTexture(GlobalData.textureManager);
         Gdx.app.postRunnable(() -> {
@@ -61,8 +61,8 @@ public class CoreMod implements Mod {
 
     @Override
     public void postInitialization(PostInitializationRegistry registry) {
-        registry.inputHandlerRegistry.addInputHandler(stuffPlacer);
         registry.inputHandlerRegistry.addInputHandler(gui);
+        registry.inputHandlerRegistry.addInputHandler(stuffPlacer);
         registry.worldSpaceRendererRegistry.addRenderable(backgroundRenderable);
         registry.worldSpaceRendererRegistry.addRenderable(worldRenderable);
         registry.worldSpaceRendererRegistry.addRenderable(stuffPlacer);
@@ -89,6 +89,6 @@ public class CoreMod implements Mod {
 
     @Override
     public String getVersion() {
-        return "0.6.0";
+        return "0.7-dev";
     }
 }

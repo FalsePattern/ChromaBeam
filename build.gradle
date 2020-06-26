@@ -1,7 +1,7 @@
 apply plugin: "java"
 apply plugin: "java-library"
 
-def version = '0.6.0'
+def version = '0.7-dev'
 def gdxVersion = '1.9.10'
 repositories {
     mavenLocal()
@@ -18,8 +18,6 @@ dependencies {
     compile 'com.badlogicgames.gdx:gdx:' + gdxVersion
     compile 'com.badlogicgames.gdx:gdx-backend-lwjgl3:' + gdxVersion
     compile 'com.badlogicgames.gdx:gdx-platform:' + gdxVersion + ':natives-desktop'
-
-    compile group: 'com.esotericsoftware', name: 'kryo', version: '5.0.0-RC6'
 }
 
 sourceCompatibility = 14

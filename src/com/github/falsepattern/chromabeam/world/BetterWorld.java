@@ -6,9 +6,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.github.falsepattern.chromabeam.core.GlobalData;
 import com.github.falsepattern.chromabeam.core.SaveEngine;
 import com.github.falsepattern.chromabeam.mod.BeamCollision;
@@ -16,11 +13,14 @@ import com.github.falsepattern.chromabeam.mod.Component;
 import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
 import com.github.falsepattern.chromabeam.mod.interfaces.World;
 import com.github.falsepattern.chromabeam.util.Pair;
+import com.github.falsepattern.chromabeam.util.serialization.Deserializer;
+import com.github.falsepattern.chromabeam.util.serialization.Serializer;
 import com.github.falsepattern.chromabeam.util.storage.*;
 import com.github.falsepattern.chromabeam.util.storage.nongeneric.NativeContainer2DIntArray;
 import com.github.falsepattern.chromabeam.util.storage.nongeneric.UnsafeComponentList;
 import com.github.falsepattern.chromabeam.util.storage.nongeneric.NodeGraphContainer2DComponent;
 
+import java.io.OutputStream;
 import java.util.*;
 
 public class BetterWorld implements World {
@@ -317,13 +317,13 @@ public class BetterWorld implements World {
     }
 
     @Override
-    public synchronized void write(Kryo kryo, Output output) {
-        SaveEngine.serializeComponents(kryo, output, componentList.toArray());
+    public synchronized void write(Serializer output) {
+        SaveEngine.serializeComponents(output, componentList.toArray());
     }
 
     @Override
-    public synchronized void read(Kryo kryo, Input input) {
-        var inputs = SaveEngine.deserializeComponents(kryo, input);
+    public synchronized void read(Deserializer input) {
+        var inputs = SaveEngine.deserializeComponents(input);
         for (int i = 0; i < inputs.length; i++) {
             setComponent(inputs[i]);
         }

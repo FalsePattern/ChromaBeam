@@ -1,12 +1,11 @@
 package com.github.falsepattern.chromabeam.circuit;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.github.falsepattern.chromabeam.mod.BasicComponent;
 import com.github.falsepattern.chromabeam.mod.BeamCollision;
 import com.github.falsepattern.chromabeam.mod.Component;
 import com.github.falsepattern.chromabeam.mod.interfaces.MaskedWorld;
+import com.github.falsepattern.chromabeam.util.serialization.Deserializer;
+import com.github.falsepattern.chromabeam.util.serialization.Serializer;
 
 public class CircuitIOPortVirtual extends BasicComponent {
     int linkID = 0;
@@ -29,12 +28,12 @@ public class CircuitIOPortVirtual extends BasicComponent {
     }
 
     @Override
-    protected void serializeCustomData(Kryo kryo, Output output) {
+    protected void serializeCustomData(Serializer output) {
         output.writeInt(linkID);
     }
 
     @Override
-    protected void deserializeCustomData(Kryo kryo, Input input) {
+    protected void deserializeCustomData(Deserializer input) {
         linkID = input.readInt();
     }
 }

@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
-import com.esotericsoftware.kryo.Kryo;
 import com.github.falsepattern.chromabeam.graphics.ScreenSpaceRenderer;
 import com.github.falsepattern.chromabeam.graphics.WorldSpaceRenderer;
 import com.github.falsepattern.chromabeam.mod.Mod;
@@ -47,8 +46,6 @@ public class GameLoader extends ApplicationAdapter {
     @SuppressWarnings({"BusyWait", "StatementWithEmptyBody"})
     @Override
     public void create() {
-        CoreData.kryo = new Kryo();
-        CoreData.kryo.setRegistrationRequired(false);
         GlobalData.inputMultiplexer = new InputMultiplexer();
         Gdx.input.setInputProcessor(GlobalData.inputMultiplexer);
         GlobalData.keyBinds = new KeyBinds();
@@ -94,7 +91,7 @@ public class GameLoader extends ApplicationAdapter {
                     var root = new JFrame();
                     JOptionPane.showMessageDialog(root, "The game has crashed and cannot be recovered. After you close this message, a save dialog will pop up to do an emergency save.", "Emergency save", JOptionPane.WARNING_MESSAGE);
                     try {
-                        if ( SaveEngine.saveComponentsToFile(CoreData.kryo, world.getAllComponents(), world.getAllLabels())) {
+                        if ( SaveEngine.saveComponentsToFile(world.getAllComponents(), world.getAllLabels())) {
                             System.err.println("Emergency save has been written. Force-shutting down game.");
                         } else {
                             System.err.println("An error occurred during emergency save. All changes since the last save have been lost, sorry...");
@@ -245,7 +242,7 @@ public class GameLoader extends ApplicationAdapter {
         var frame = new JFrame();
         var prompt = JOptionPane.showConfirmDialog(frame, "Would you like to save the current world to disk?", "Qutting game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (prompt == JOptionPane.YES_OPTION) {
-            SaveEngine.saveComponentsToFile(CoreData.kryo, world.getAllComponents(), world.getAllLabels());
+            SaveEngine.saveComponentsToFile(world.getAllComponents(), world.getAllLabels());
         }
         GlobalData.textureManager.dispose();
         GlobalData.soundManager.dispose();

@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
-import com.esotericsoftware.kryo.Kryo;
 import com.github.falsepattern.chromabeam.circuit.CircuitIOPort;
 import com.github.falsepattern.chromabeam.circuit.CircuitMaster;
 import com.github.falsepattern.chromabeam.circuit.CircuitSlave;
@@ -48,13 +47,11 @@ class StuffPlacer implements Renderable, InputHandler {
     private State state = State.PLACE;
     private final Vector2i positionA = new Vector2i();
     private final Vector2i positionB = new Vector2i();
-    private final Kryo kryo;
     private boolean clicking = false;
 
-    public StuffPlacer(TextureRegion selectionOverlayTexture, GUI gui, Kryo kryo) {
+    public StuffPlacer(TextureRegion selectionOverlayTexture, GUI gui) {
         this.overlayTexture = selectionOverlayTexture;
         this.gui = gui;
-        this.kryo = kryo;
     }
 
     private Component worldComponent;
@@ -492,13 +489,13 @@ class StuffPlacer implements Renderable, InputHandler {
         if (GlobalData.keyBinds.isJustPressed("export")) {
             gui.postStuckKeyEvent("export", () -> {
                 cloneSelectionToHover();
-                SaveEngine.saveComponentsToFile(kryo, clonedComponents.a.toArray(Component[]::new), clonedComponents.b);
+                SaveEngine.saveComponentsToFile(clonedComponents.a.toArray(Component[]::new), clonedComponents.b);
             });
         }
 
         if (GlobalData.keyBinds.isJustPressed("import")) {
             gui.postStuckKeyEvent("import", () -> {
-                var arr = SaveEngine.loadComponentsFromFile(kryo);
+                var arr = SaveEngine.loadComponentsFromFile();
                 if (arr != null) {
                     clear();
                     clonedComponents.a.addAll(Arrays.asList(arr.A));
@@ -544,7 +541,7 @@ class StuffPlacer implements Renderable, InputHandler {
         }
         if (worldComponent != null) {
             if (GlobalData.keyBinds.isJustPressed("export_circuit") && (worldComponent instanceof CircuitMaster || worldComponent instanceof CircuitSlave))
-                (worldComponent instanceof CircuitSlave ? ((CircuitSlave) worldComponent).master : (CircuitMaster) worldComponent).exportChildWorld(kryo);
+                (worldComponent instanceof CircuitSlave ? ((CircuitSlave) worldComponent).master : (CircuitMaster) worldComponent).exportChildWorld();
         }
         if (current != null) {
             if (!(current instanceof CircuitSlave) && !(current instanceof CircuitMaster)) {
@@ -588,7 +585,7 @@ class StuffPlacer implements Renderable, InputHandler {
                 var runnable = new AtomicReference<Runnable>();
                 save.addActionListener((event) -> {
                     runnable.set(() -> {
-                        if (SaveEngine.saveComponentsToFile(kryo, world.getAllComponents(), world.getAllLabels())) {
+                        if (SaveEngine.saveComponentsToFile(world.getAllComponents(), world.getAllLabels())) {
                             GlobalData.soundManager.play("saved");
                         }
                     });
@@ -596,7 +593,7 @@ class StuffPlacer implements Renderable, InputHandler {
                 });
                 load.addActionListener((event) -> {
                     runnable.set(() -> {
-                        var comps = SaveEngine.loadComponentsFromFile(kryo);
+                        var comps = SaveEngine.loadComponentsFromFile();
                         if (comps != null) {
                             world.clear();
                             world.pause();

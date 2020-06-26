@@ -1,11 +1,10 @@
 package com.github.falsepattern.chromabeam.core;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.github.falsepattern.chromabeam.circuit.CircuitSlave;
 import com.github.falsepattern.chromabeam.util.ImmutablePair;
 import com.github.falsepattern.chromabeam.mod.Component;
+import com.github.falsepattern.chromabeam.util.serialization.Deserializer;
+import com.github.falsepattern.chromabeam.util.serialization.Serializer;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -17,12 +16,12 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class SaveEngine {
-    public static ImmutablePair<Component[], Map<int[], String>> loadComponentsFromFile(Kryo kryo) {
+    public static ImmutablePair<Component[], Map<int[], String>> loadComponentsFromFile() {
         var parentFrame = new JFrame();
         var chooser = createChooser();
         int userSelection = chooser.showDialog(parentFrame, "Load");
         if (userSelection == JFileChooser.APPROVE_OPTION) {
-            try (var input = new com.esotericsoftware.kryo.io.Input(new GZIPInputStream(new GZIPInputStream(new FileInputStream(chooser.getSelectedFile()))))) {
+            try (var input = new Deserializer(new GZIPInputStream(new GZIPInputStream(new FileInputStream(chooser.getSelectedFile()))))) {
                 var errorBuilder = new StringBuilder();
                 var mismatch = false;
                 var fatalMismatch = false;
@@ -91,7 +90,7 @@ public class SaveEngine {
                             return null;
                         }
                     }
-                    var resultComp = deserializeComponents(kryo, input);
+                    var resultComp = deserializeComponents(input);
                     var coreVerSave = GlobalData.modsInLoadedSave.get("core");
                     var resultLabel = new HashMap<int[], String>();
                     if (!coreVerSave.equals("0.3.0") && !coreVerSave.equals("0.3.1")) {
@@ -113,7 +112,7 @@ public class SaveEngine {
         return null;
     }
 
-    public static boolean saveComponentsToFile(Kryo kryo, Component[] components, Map<int[], String> labels) {
+    public static boolean saveComponentsToFile(Component[] components, Map<int[], String> labels) {
         var parentFrame = new JFrame();
         var chooser = createChooser();
         int userSelection = chooser.showDialog(parentFrame, "Save");
@@ -121,17 +120,17 @@ public class SaveEngine {
             if (!chooser.getSelectedFile().getName().endsWith(".chroma")) {
                 chooser.setSelectedFile(new File(chooser.getSelectedFile().getAbsolutePath() + ".chroma"));
             }
-            try (var output = new Output(new GZIPOutputStream(new GZIPOutputStream(new FileOutputStream(chooser.getSelectedFile()))))) {
+            try (var output = new Serializer(new GZIPOutputStream(new GZIPOutputStream(new FileOutputStream(chooser.getSelectedFile()))))) {
                 output.writeInt(GlobalData.mods.length);
                 for (var mod: GlobalData.mods) {
-                    output.writeString(mod.getModid());
-                    output.writeString(mod.getVersion());
+                    output.writeAsciiString(mod.getModid());
+                    output.writeAsciiString(mod.getVersion());
                 }
-                serializeComponents(kryo, output, components);
+                serializeComponents(output, components);
                 output.writeInt(labels.size());
                 for (var entry: labels.entrySet()) {
                     output.writeInts(entry.getKey(), 0, 2);
-                    output.writeString(entry.getValue());
+                    output.writeAsciiString(entry.getValue());
                 }
                 return true;
             } catch (FileNotFoundException e) {
@@ -143,22 +142,22 @@ public class SaveEngine {
         return false;
     }
 
-    public static void serializeComponents(Kryo kryo, Output output, Component[] components) {
+    public static void serializeComponents(Serializer output, Component[] components) {
         int savedCount = 0;
         for (int i = 0; i < components.length; i++) {
             if (!(components[i] instanceof CircuitSlave)) savedCount++;
         }
         output.writeInt(savedCount);
         for (int i = 0; i < components.length; i++) {
-            if (!(components[i] instanceof CircuitSlave)) kryo.writeClassAndObject(output, components[i]);
+            if (!(components[i] instanceof CircuitSlave)) output.writeObject(components[i]);
         }
     }
 
-    public static Component[] deserializeComponents(Kryo kryo, Input input) {
+    public static Component[] deserializeComponents(Deserializer input) {
         int loadCount = input.readInt();
         var result = new Component[loadCount];
         for (int i = 0; i < loadCount; i++) {
-            result[i] = (Component) kryo.readClassAndObject(input);
+            result[i] = input.readObject();
         }
         return result;
     }
