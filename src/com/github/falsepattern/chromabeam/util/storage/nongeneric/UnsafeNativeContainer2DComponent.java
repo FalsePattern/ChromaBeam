@@ -3,7 +3,6 @@ package com.github.falsepattern.chromabeam.util.storage.nongeneric;
 import com.github.falsepattern.chromabeam.mod.Component;
 import com.github.falsepattern.chromabeam.util.MutablePair;
 import com.github.falsepattern.chromabeam.util.Pair;
-import com.github.falsepattern.chromabeam.util.storage.Container2D;
 import com.github.falsepattern.chromabeam.util.storage.UnsafeList;
 
 import java.util.List;

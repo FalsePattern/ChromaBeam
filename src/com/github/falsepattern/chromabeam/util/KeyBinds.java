@@ -6,7 +6,6 @@ import com.badlogic.gdx.InputProcessor;
 
 
 import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.SortedIntList;
 import com.github.falsepattern.chromabeam.util.storage.UnsafeList;
 
 import java.io.PrintStream;
@@ -14,9 +13,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class KeyBinds implements InputProcessor {
-    private Map<String, Integer> bindings;
-    private IntMap<Boolean> pressed;
-    private IntMap<Boolean> prevFramePressed;
+    private final Map<String, Integer> bindings;
+    private final IntMap<Boolean> pressed;
+    private final IntMap<Boolean> prevFramePressed;
     public KeyBinds() {
         bindings = loadBindings();
         pressed = new IntMap<>();

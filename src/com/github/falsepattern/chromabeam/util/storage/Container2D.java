@@ -5,7 +5,6 @@ import com.github.falsepattern.chromabeam.util.Pair;
 import com.github.falsepattern.chromabeam.util.Vector2i;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 /**

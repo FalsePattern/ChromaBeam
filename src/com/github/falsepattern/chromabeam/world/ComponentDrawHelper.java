@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.github.falsepattern.chromabeam.graphics.DrawingHelpers;
 import com.github.falsepattern.chromabeam.mod.Component;
 
+@SuppressWarnings("MismatchedReadAndWriteOfArray")
 public class ComponentDrawHelper {
     private int[][][] intsBackBuffer;
     private boolean[][] flippedBackBuffer;
@@ -17,8 +18,8 @@ public class ComponentDrawHelper {
     private boolean[][] flippedFrontBuffer;
     private TextureRegion[][] textureFrontBuffer;
 
-    private int[] backBufferSize = new int[8];
-    private int[] frontBufferSize = new int[8];
+    private final int[] backBufferSize = new int[8];
+    private final int[] frontBufferSize = new int[8];
     private static final int[] EMPTY = new int[8];
 
     private volatile boolean hasNext = false;

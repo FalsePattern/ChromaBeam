@@ -10,8 +10,8 @@ public abstract class CircuitSlave extends BasicComponent {
      * It should be in the format of "developername.modname.componentname" or "modname.componentname" for consistency.
      * AlternativeCount defines how many alternative types the prefab of this component has.
      *
-     * @param alternativeCount
-     * @param registryName
+     * @param alternativeCount The amount of player-chooseable alternative types
+     * @param registryName The registry name of the component
      */
     public CircuitSlave(int alternativeCount, String registryName) {
         super(alternativeCount, registryName, "circuit");

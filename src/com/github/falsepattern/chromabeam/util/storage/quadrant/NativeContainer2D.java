@@ -40,6 +40,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
     }
 
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNXPP(int x, int y, Object[][] storage) {
         if (storage.length > y) {
             var row = storage[y];
@@ -50,6 +51,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNXNN(int x, int y, Object[][] storage) {
         if (storage.length > y) {
             var row = storage[y];
@@ -60,6 +62,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNXNP(int x, int y, Object[][] storage) {
         if (storage.length > y) {
             var row = storage[y];
@@ -70,6 +73,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNXPN(int x, int y, Object[][] storage) {
         if (storage.length > y) {
             var row = storage[y];
@@ -98,6 +102,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNYPP(int x, int y, Object[][] storage) {
         for (; y < storage.length; y++) {
             if (storage[y].length > x) {
@@ -107,6 +112,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNYNN(int x, int y, Object[][] storage) {
         for (y = ~y; y < storage.length; y++) {
             if (storage[y].length > x) {
@@ -116,6 +122,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNYNP(int x, int y, Object[][] storage) {
         for (y = Math.min(y, storage.length - 1); y >= 0; y--) {
             if (storage[y].length > x) {
@@ -125,6 +132,7 @@ abstract class NativeContainer2D<T> extends NativeContainer2DBase<T>{
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Pair<int[], T> getNYPN(int x, int y, Object[][] storage) {
         for (y = Math.min(~y, storage.length - 1); y >= 0; y--) {
             if (storage[y].length > x) {

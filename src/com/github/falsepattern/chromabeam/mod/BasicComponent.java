@@ -5,7 +5,6 @@ import com.github.falsepattern.chromabeam.mod.interfaces.World;
 import com.github.falsepattern.chromabeam.util.serialization.Deserializer;
 import com.github.falsepattern.chromabeam.util.serialization.Serializer;
 
-import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 
 /**

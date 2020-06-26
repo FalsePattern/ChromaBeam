@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class Deserializer implements AutoCloseable{
 
-    private InputStream stream;
+    private final InputStream stream;
     public Deserializer(InputStream stream) {
         this.stream = stream;
     }
@@ -98,7 +98,7 @@ public class Deserializer implements AutoCloseable{
 
     public String readString() {
         var builder = new StringBuilder();
-        byte data = 0;
+        byte data;
         while (((data = readByte()) & 0b10000000) == 0) {
             builder.append((char)(data & 0x7f));
         }

@@ -8,7 +8,7 @@ import com.github.falsepattern.chromabeam.mod.interfaces.Renderable;
 import com.github.falsepattern.chromabeam.util.Vector2i;
 
 class CameraMover implements Renderable {
-    private Vector2i mousePrev = new Vector2i();
+    private final Vector2i mousePrev = new Vector2i();
     @Override
     public void prepare(SpriteBatch batch, OrthographicCamera camera) {
         int x = Gdx.input.getX();

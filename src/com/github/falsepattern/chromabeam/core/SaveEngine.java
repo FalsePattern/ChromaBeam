@@ -60,10 +60,8 @@ public class SaveEngine {
                             }
                             mismatch = true;
                             errorBuilder.append("[CRITICAL] Game has different version of mod: ").append(modInSave).append(". In Game: ").append(gameVer).append("; In Save: ").append(saveVer).append('\n');
-                            matchingMods.add(modInSave);
-                        } else {
-                            matchingMods.add(modInSave);
                         }
+                        matchingMods.add(modInSave);
                     }
                 }
                 for (var modInGame: modsInGame) {

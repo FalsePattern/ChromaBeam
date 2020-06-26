@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Map;
 
 public class SoundManager {
-    private Map<String, Sound> sounds;
+    private final Map<String, Sound> sounds;
     SoundManager(Map<String, Sound> sounds) {
         this.sounds = Collections.unmodifiableMap(sounds);
     }

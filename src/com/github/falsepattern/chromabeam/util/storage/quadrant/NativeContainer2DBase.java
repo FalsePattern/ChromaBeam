@@ -15,6 +15,7 @@ public class NativeContainer2DBase<T> implements Container2D<T> {
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T get(int x, int y) {
         var quadrant = quadrants[((y >>> 31) << 1) | (x >>> 31)];
@@ -29,6 +30,7 @@ public class NativeContainer2DBase<T> implements Container2D<T> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T set(int x, int y, T data) {
         var id = ((y >>> 31) << 1) | (x >>> 31);
@@ -51,6 +53,7 @@ public class NativeContainer2DBase<T> implements Container2D<T> {
         return (T) original;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T remove(int x, int y) {
         var quadrant = quadrants[((y >>> 31) << 1) | (x >>> 31)];
@@ -80,6 +83,7 @@ public class NativeContainer2DBase<T> implements Container2D<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<T> getNonNullUnordered() {
         var result = new UnsafeList<T>();

@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.github.falsepattern.chromabeam.mod.interfaces.Renderable;
 
 class BackgroundRenderable implements Renderable, Disposable {
-    private Texture bg;
+    private final Texture bg;
     BackgroundRenderable() {
         bg = new Texture(Gdx.files.internal("assets/core/textures/bg.png"), true);
         bg.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear);

@@ -11,7 +11,7 @@ import java.util.List;
 public class Renderer implements RendererRegistry {
     protected SpriteBatch batch;
     protected OrthographicCamera camera;
-    private List<Renderable> renderables;
+    private final List<Renderable> renderables;
 
     public Renderer(int size) {
         batch = new SpriteBatch(size);

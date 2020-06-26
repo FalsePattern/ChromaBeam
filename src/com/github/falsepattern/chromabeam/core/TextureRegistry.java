@@ -8,7 +8,7 @@ public class TextureRegistry {
 
     private final UnsafeList<TextureTile> textures;
     private boolean finished = false;
-    private ResourcePack resourcePack;
+    private final ResourcePack resourcePack;
 
     TextureRegistry(ResourcePack resourcePack) {
         textures = new UnsafeList<>();

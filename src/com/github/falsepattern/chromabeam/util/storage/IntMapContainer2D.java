@@ -6,9 +6,6 @@ import com.github.falsepattern.chromabeam.util.ImmutablePair;
 import com.github.falsepattern.chromabeam.util.MutablePair;
 import com.github.falsepattern.chromabeam.util.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * An implementation of Container2D using {@link IntMap}s provided by the LibGDX engine.
  * @param <T>

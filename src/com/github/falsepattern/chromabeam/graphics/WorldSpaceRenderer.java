@@ -8,7 +8,7 @@ public class WorldSpaceRenderer extends Renderer implements InputProcessor {
 
     private float zoom = 10;
     private float deltaZoom = 0;
-    private float deltaTransferSpeed = 0.1f;
+    private final float deltaTransferSpeed = 0.1f;
 
     public WorldSpaceRenderer() {
         super(8191);

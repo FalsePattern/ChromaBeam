@@ -60,6 +60,7 @@ public class UnsafeList<T> extends AbstractList<T> implements RandomAccess{
                 return ctr < arraySize;
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public T next() {
                 return (T)storage[ctr++];
@@ -72,6 +73,7 @@ public class UnsafeList<T> extends AbstractList<T> implements RandomAccess{
         return Arrays.copyOf(storage, arraySize);
     }
 
+    @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy"})
     @Override
     public <T1> T1[] toArray(T1[] a) {
         if (a.length >= arraySize) {
@@ -168,11 +170,13 @@ public class UnsafeList<T> extends AbstractList<T> implements RandomAccess{
         arraySize = 0;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T get(int index) {
         return (T)storage[index];
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T set(int index, T element) {
         if (index == arraySize) arraySize++;
@@ -190,6 +194,7 @@ public class UnsafeList<T> extends AbstractList<T> implements RandomAccess{
         arraySize++;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T remove(int index) {
         var original = storage[index];
@@ -233,11 +238,7 @@ public class UnsafeList<T> extends AbstractList<T> implements RandomAccess{
             while (iterA.hasNext() && iterB.hasNext()) {
                 if (!Objects.equals(iterA.next(), iterB.next())) return false;
             }
-            if ((iterA.hasNext() ^ iterB.hasNext())) {
-                return false;
-            } else {
-                return true;
-            }
+            return iterA.hasNext() == iterB.hasNext();
         }
     }
 
@@ -258,6 +259,7 @@ public class UnsafeList<T> extends AbstractList<T> implements RandomAccess{
             return ctr < arraySize;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public T next() {
             canModify = true;
@@ -270,6 +272,7 @@ public class UnsafeList<T> extends AbstractList<T> implements RandomAccess{
             return ctr > 0;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public T previous() {
             canModify = true;

@@ -1,7 +1,5 @@
 package com.github.falsepattern.chromabeam.world;
 
-import java.util.Arrays;
-
 public class BeamDataContainer {
     private int[][] rearStorage;
     private int[][] frontStorage;

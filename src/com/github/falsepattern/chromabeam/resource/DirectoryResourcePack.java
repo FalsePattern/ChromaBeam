@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class DirectoryResourcePack implements ResourcePack{
-    private File directory;
+    private final File directory;
     public DirectoryResourcePack(File directory) {
         this.directory = directory;
     }

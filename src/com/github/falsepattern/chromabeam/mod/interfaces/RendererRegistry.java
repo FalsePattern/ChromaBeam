@@ -8,5 +8,5 @@ public interface RendererRegistry {
     /**
      * Adds a renderable to the renderer.
      */
-    public void addRenderable(Renderable renderable);
+    void addRenderable(Renderable renderable);
 }

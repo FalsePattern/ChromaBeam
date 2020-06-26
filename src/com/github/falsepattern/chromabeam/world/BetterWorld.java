@@ -20,7 +20,6 @@ import com.github.falsepattern.chromabeam.util.storage.nongeneric.NativeContaine
 import com.github.falsepattern.chromabeam.util.storage.nongeneric.UnsafeComponentList;
 import com.github.falsepattern.chromabeam.util.storage.nongeneric.NodeGraphContainer2DComponent;
 
-import java.io.OutputStream;
 import java.util.*;
 
 public class BetterWorld implements World {
@@ -108,6 +107,7 @@ public class BetterWorld implements World {
     public synchronized void beamUpdate() {
         emitInitialBeams();
         if (doRendering) {
+            assert beamDrawHelper != null;
             beamDrawHelper.clearBackBuffer();
             resolveBeams();
             beamDrawHelper.finishBackBuffer();
@@ -118,7 +118,9 @@ public class BetterWorld implements World {
 
     public synchronized void componentUpdate() {
         if (doRendering) {
+            assert mipMappedComponentDrawHelper != null;
             mipMappedComponentDrawHelper.clearBackBuffer();
+            assert unMipMappedComponentDrawHelper != null;
             unMipMappedComponentDrawHelper.clearBackBuffer();
             var s = componentList.size() - 1;
             var st = componentList.storage;
@@ -300,9 +302,11 @@ public class BetterWorld implements World {
     @Override
     public void drawComponents(SpriteBatch batch, OrthographicCamera camera) {
         if (doRendering) {
+            assert unMipMappedComponentDrawHelper != null;
             unMipMappedComponentDrawHelper.draw(batch, camera);
             batch.flush();
             GlobalData.textureManager.texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear);
+            assert mipMappedComponentDrawHelper != null;
             mipMappedComponentDrawHelper.draw(batch, camera);
             batch.flush();
             GlobalData.textureManager.texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -312,8 +316,10 @@ public class BetterWorld implements World {
 
     @Override
     public void drawBeams(SpriteBatch batch, OrthographicCamera camera) {
-        if (doRendering)
-        beamDrawHelper.draw(batch, camera);
+        if (doRendering) {
+            assert beamDrawHelper != null;
+            beamDrawHelper.draw(batch, camera);
+        }
     }
 
     @Override
@@ -331,6 +337,7 @@ public class BetterWorld implements World {
 
     private void scheduleBeamDraw(int x, int y, int rotation, int length, int color, BeamCollision collision) {
         if (doRendering) {
+            assert beamDrawHelper != null;
             beamDrawHelper.addToBackBuffer(x, y, rotation, length, color, switch (collision) {
                 case EDGE -> 1;
                 case CENTER -> 0;
@@ -341,6 +348,7 @@ public class BetterWorld implements World {
 
     private void scheduleEndlessBeamDraw(int x, int y, int rotation, int color) {
         if (doRendering) {
+            assert beamDrawHelper != null;
             beamDrawHelper.addToBackBuffer(x, y, rotation, Integer.MAX_VALUE, color, 1);
         }
     }
@@ -353,14 +361,15 @@ public class BetterWorld implements World {
         private final NativeContainer2DIntArray componentColors = new NativeContainer2DIntArray();
 
         private int[] colorMap;
-        private final int[] empty = new int[8];
+        @SuppressWarnings("MismatchedReadAndWriteOfArray")
+        private final int[] EMPTY = new int[8];
         private void prepare(Component component) {
             x = component.getX();
             y = component.getY();
             rotation = component.getRotation();
             flipped = component.getFlipped() ? -1 : 1;
             colorMap = componentColors.get(x, y);
-            System.arraycopy(empty, 0, colorMap, 0, 8);
+            System.arraycopy(EMPTY, 0, colorMap, 0, 8);
         }
 
         private void add(int x, int y) {

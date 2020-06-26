@@ -43,7 +43,11 @@ public class TextureManager implements ReadableSpriteAtlas, Disposable {
         int i = 0;
         for (var frame: allFrames.entrySet()) {
             textureNames.add(frame.getKey());
-            int arrSize = Arrays.stream(frame.getValue().keys().toArray().items).max().getAsInt() + 1;
+            var optionMax = Arrays.stream(frame.getValue().keys().toArray().items).max();
+            int arrSize = 0;
+            if (optionMax.isPresent()) {
+                arrSize = optionMax.getAsInt() + 1;
+            }
             var frames = new TextureRegion[arrSize];
             for (int j = 0; j < arrSize; j++) {
                 frames[j] = frame.getValue().get(j);

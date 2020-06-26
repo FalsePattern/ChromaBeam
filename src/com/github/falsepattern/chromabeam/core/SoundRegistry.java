@@ -3,15 +3,13 @@ package com.github.falsepattern.chromabeam.core;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.github.falsepattern.chromabeam.resource.ResourcePack;
-import com.github.falsepattern.chromabeam.util.FakeFileHandle;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SoundRegistry {
-    private Map<String, Sound> sounds;
-    private ResourcePack resourcePack;
+    private final Map<String, Sound> sounds;
+    private final ResourcePack resourcePack;
     SoundRegistry(ResourcePack resourcePack) {
         sounds = new HashMap<>();
         this.resourcePack = resourcePack;

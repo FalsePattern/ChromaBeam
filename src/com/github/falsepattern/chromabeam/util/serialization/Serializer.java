@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Serializer implements AutoCloseable {
     private static final byte[] OBJECT_HEADER = new byte[]{0x01, 0x00};
-    private OutputStream stream;
+    private final OutputStream stream;
     public Serializer(OutputStream stream) {
         this.stream = stream;
     }
