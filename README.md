@@ -1,5 +1,7 @@
 ChromaBeam is a digital logic simulation game that uses lasers as signals. The game is heavily inspired by Logic World and OCTOPTICOM.
 
+Note: Development of this project has been halted indefinitely.
+
 # Basic information
 <details>
   <summary>Click to expand</summary>
