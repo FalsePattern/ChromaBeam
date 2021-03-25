@@ -1,3 +1,10 @@
+# -----------!!!2021-03-25  UPDATE!!!-----------
+The game is being rewritten using Java 16 and LWJGL 3, with a custom-made game engine specifically built for the component densities achievable with huge circuits. You can track the development progress at https://github.com/FalsePattern/NewChromaBeam. This repository is archived from now on, and all further development will be done on the new repository.
+
+
+
+# -----------Original Description-----------
+
 ChromaBeam is a digital logic simulation game that uses lasers as signals. The game is heavily inspired by Logic World and OCTOPTICOM.
 
 Note: Development of this project has been halted indefinitely.
